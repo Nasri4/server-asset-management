@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { LogOut } from "lucide-react";
 
 import { SidebarNav } from "@/components/layout/sidebar-nav";
@@ -9,6 +10,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+
+import SidebarLogo from "@/app/hlogo.png";
 
 function initials(email?: string) {
   const e = String(email ?? "").trim();
@@ -32,6 +35,30 @@ export function Sidebar({ collapsed }: { collapsed: boolean }) {
       )}
     >
       <div className="flex h-full flex-col">
+        {/* Logo Section */}
+        <div className={cn("px-4 py-4 border-b border-sidebar-border/50", collapsed && "px-2")}>
+          <div className={cn("flex items-center gap-2", collapsed && "justify-center")}>
+            <div className={cn(
+              "flex items-center justify-center rounded-lg bg-white p-2 shadow-sm border border-sidebar-border/30",
+              collapsed ? "w-12 h-12" : "w-10 h-10"
+            )}>
+              <Image
+                src={SidebarLogo}
+                alt="Logo"
+                width={collapsed ? 40 : 32}
+                height={collapsed ? 40 : 32}
+                priority
+                className="object-contain"
+              />
+            </div>
+            {!collapsed && (
+              <span className="text-sm font-semibold text-sidebar-foreground whitespace-nowrap">
+                Server System
+              </span>
+            )}
+          </div>
+        </div>
+
         <div className={cn("flex-1 overflow-y-auto px-0 pt-4 pb-2")}>
           <div className={cn("flex min-h-full flex-col", collapsed && "[&_a]:justify-center")}>
             <SidebarNav pathname={pathname} collapsed={collapsed} />
