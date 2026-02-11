@@ -16,6 +16,9 @@ import {
   BarChart3,
   ArrowUpRight,
   ArrowDownRight,
+  Users,
+  Shield,
+  Cpu,
   Cloud,
   Database,
   Globe,
@@ -31,10 +34,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api/client";
 import { useAuth } from "@/components/auth/auth-provider";
 import { can } from "@/lib/rbac";
-import { ServerStatusDonutChart } from "@/components/dashboard/server-status-donut-chart";
-import { MaintenanceTrendChart } from "@/components/dashboard/maintenance-trend-chart";
-import { ServerDistributionChart } from "@/components/dashboard/server-distribution-chart";
-import { RecentActivityTimeline } from "@/components/dashboard/recent-activity-timeline";
 
 type DashboardStats = {
   total_servers: number;
@@ -67,6 +66,60 @@ type ServerRow = {
 
 type EngineerRow = {
   is_active?: boolean;
+};
+
+// Premium Chart Component with Gradient
+const StatusDistributionChart = ({ total, counts }: { total: number; counts: Record<string, number> }) => {
+  const statusConfig = {
+    Active: { color: "from-emerald-500 to-green-500", bg: "bg-emerald-500/10", text: "text-emerald-700" },
+    Maintenance: { color: "from-amber-500 to-orange-500", bg: "bg-amber-500/10", text: "text-amber-700" },
+    Degraded: { color: "from-slate-500 to-gray-500", bg: "bg-slate-500/10", text: "text-slate-700" },
+    Issue: { color: "from-rose-500 to-pink-500", bg: "bg-rose-500/10", text: "text-rose-700" },
+    Warning: { color: "from-yellow-500 to-orange-400", bg: "bg-yellow-500/10", text: "text-yellow-700" },
+    Down: { color: "from-red-500 to-rose-600", bg: "bg-red-500/10", text: "text-red-700" },
+  };
+
+  const totalSafe = total > 0 ? total : 1;
+  const items = Object.entries(counts)
+    .map(([key, count]) => {
+      const config = statusConfig[key as keyof typeof statusConfig] || {
+        color: "from-slate-500 to-gray-500",
+        bg: "bg-slate-500/10",
+        text: "text-slate-700"
+      };
+      return {
+        key,
+        count,
+        percentage: Math.round((count / totalSafe) * 100),
+        ...config
+      };
+    })
+    .sort((a, b) => b.count - a.count);
+
+  return (
+    <div className="space-y-4">
+      {items.map((item, index) => (
+        <div key={`status-item-${item.key}-${index}`} className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`h-2 w-2 rounded-full bg-linear-to-r ${item.color}`} />
+              <span className="text-sm font-medium text-slate-900">{item.key}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-slate-900">{item.count}</span>
+              <span className="text-xs text-slate-500">({item.percentage}%)</span>
+            </div>
+          </div>
+          <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+            <div
+              className={`h-full rounded-full bg-linear-to-r ${item.color}`}
+              style={{ width: `${item.percentage}%` }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 // Premium Trend Indicator
@@ -410,30 +463,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Analytics & Charts Section */}
-        <div className="mb-8">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-slate-900">Analytics Overview</h2>
-            <p className="text-sm text-slate-500">Visual insights into your infrastructure</p>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {/* Server Status Donut Chart */}
-            <ServerStatusDonutChart data={serverStatusCounts} loading={loading} />
-            
-            {/* Maintenance Trend Chart */}
-            <MaintenanceTrendChart loading={loading} />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Server Distribution Bar Chart */}
-            <ServerDistributionChart loading={loading} />
-            
-            {/* Recent Activity Timeline */}
-            <RecentActivityTimeline loading={loading} />
-          </div>
-        </div>
-
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Incidents & Maintenance */}
@@ -582,8 +611,41 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Right Column - Quick Stats */}
+          {/* Right Column - Status & Quick Stats */}
           <div className="space-y-6">
+            {/* Server Status Distribution Card */}
+            <Card className="border-slate-200">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-purple-500" />
+                  <CardTitle className="text-lg font-semibold">Server Status</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, i) => (
+                      <div key={`status-skeleton-${i}`} className="space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-2 w-full" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <StatusDistributionChart total={stats?.total_servers ?? 0} counts={serverStatusCounts} />
+                )}
+                
+                {!loading && stats?.total_servers && (
+                  <div className="mt-6 pt-4 border-t border-slate-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-600">Total Servers</span>
+                      <span className="text-lg font-bold text-slate-900">{stats.total_servers}</span>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Quick Stats Card */}
             <QuickStatsCard
               title="System Overview"
