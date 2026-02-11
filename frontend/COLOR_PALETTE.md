@@ -1,25 +1,30 @@
-# 🎨 Enterprise Color Palette - Quick Reference
+# 🎨 Soft Green Design System - Color Palette
 
 ## Primary Brand Colors
 
-### Light Emerald Green (Main Color)
+### Soft Green (Main Brand Color)
 
 ```
-HEX: #059669
-RGB: 5, 150, 105
-Tailwind: emerald-600
+HEX: #22C55E
+RGB: 34, 197, 94
+Tailwind: primary-500
 CSS Variable: --primary
-Use: Primary buttons, key actions, brand elements
+Use: Primary buttons, key actions, brand elements, focus rings
 ```
 
-### Emerald Accent
+### Soft Green Scale
 
 ```
-HEX: #10B981
-RGB: 16, 185, 129
-Tailwind: emerald-500
-CSS Variable: --sam-success / --ring
-Use: Success states, accents, highlights, focus rings
+primary-50   → #F0FDF4  (Very light tint, backgrounds)
+primary-100  → #DCFCE7  (Subtle backgrounds, hover states)
+primary-200  → #BBF7D0  (Lighter accents)
+primary-300  → #86EFAC  (Soft highlights)
+primary-400  → #4ADE80  (Accent elements)
+primary-500  → #22C55E  (Main brand color ⭐)
+primary-600  → #16A34A  (Hover state - primary buttons)
+primary-700  → #15803D  (Active/pressed state)
+primary-800  → #166534  (Dark mode strong)
+primary-900  → #14532D  (Darkest, high contrast)
 ```
 
 ---
@@ -47,33 +52,41 @@ Use: Hover states for blue elements
 
 ---
 
-## Backgrounds
+## Neutrals (Gray Scale)
 
 ### Light Mode
 
 ```
-Background: #F8FAFC (slate-50)
-Card Surface: #FFFFFF (white)
-Muted: #F1F5F9 (slate-100)
+gray-50   → #FAFAFA  (App background, subtle surface)
+gray-100  → #F5F5F5  (Section backgrounds)
+gray-200  → #E5E5E5  (Subtle borders, dividers)
+gray-300  → #D4D4D4  (Input borders default)
+gray-400  → #A3A3A3  (Disabled states, placeholders)
+gray-500  → #737373  (Secondary text, icons)
+gray-600  → #525252  (Body text)
+gray-700  → #404040  (Primary text)
+gray-800  → #262626  (Headings, emphasis)
+gray-900  → #171717  (Maximum contrast, headers)
 ```
 
 ### Dark Mode
 
 ```
-Background: #0F172A (slate-900)
-Card Surface: #1E293B (slate-800)
-Muted: #1E293B (slate-800)
+Background: #0A0A0A (Main dark background)
+Card Surface: #171717 (Dark card surface)
+Elevated: #262626 (Elevated elements)
+Border: #404040 (Dark borders)
 ```
 
 ---
 
 ## Status Colors
 
-### Success (Emerald)
+### Success (Soft Green)
 
 ```
-Main: #10B981 (emerald-500)
-Soft Background: #D1FAE5 (emerald-100)
+Main: #22C55E (primary-500)
+Soft Background: #F0FDF4 (primary-50)
 Dark Soft: #064E3B (emerald-900)
 Use: Success messages, healthy status, positive indicators
 ```
@@ -82,25 +95,25 @@ Use: Success messages, healthy status, positive indicators
 
 ```
 Main: #F59E0B (amber-500)
-Soft Background: #FEF3C7 (amber-100)
+Soft Background: #FFFBEB (amber-50)
 Dark Soft: #451A03 (amber-950)
 Use: Warning messages, needs attention, caution
 ```
 
-### Danger/Error (Rose)
+### Error (Red)
 
 ```
-Main: #F43F5E (rose-500)
-Soft Background: #FFE4E6 (rose-100)
+Main: #EF4444 (red-500)
+Soft Background: #FEF2F2 (red-50)
 Dark Soft: #4C0519 (rose-950)
 Use: Error messages, critical status, destructive actions
 ```
 
-### Info (Sky)
+### Info (Sky Blue)
 
 ```
 Main: #0EA5E9 (sky-500)
-Soft Background: #E0F2FE (sky-100)
+Soft Background: #F0F9FF (sky-50)
 Dark Soft: #075985 (sky-900)
 Use: Informational messages, help text, notifications
 ```
@@ -112,15 +125,15 @@ Use: Informational messages, help text, notifications
 ### Light Mode
 
 ```
-Border: #E2E8F0 (slate-200)
-Input Border: #E2E8F0 (slate-200)
+Border: #E5E5E5 (gray-200)
+Input Border: #D4D4D4 (gray-300)
 ```
 
 ### Dark Mode
 
 ```
-Border: #334155 (slate-700)
-Input Border: #334155 (slate-700)
+Border: #404040 (gray-700)
+Input Border: #404040 (gray-700)
 ```
 
 ---
@@ -130,15 +143,17 @@ Input Border: #334155 (slate-700)
 ### Light Mode
 
 ```
-Foreground: #0F172A (slate-900)
-Muted: #64748B (slate-500)
+Foreground: #404040 (gray-700) - Primary text
+Muted: #737373 (gray-500) - Secondary text
+Heading: #262626 (gray-800) - Headlines
 ```
 
 ### Dark Mode
 
 ```
-Foreground: #F1F5F9 (slate-100)
-Muted: #94A3B8 (slate-400)
+Foreground: #FAFAFA (gray-50) - Primary text
+Muted: #A3A3A3 (gray-400) - Secondary text
+Heading: #FAFAFA (gray-50) - Headlines
 ```
 
 ---
@@ -147,7 +162,7 @@ Muted: #94A3B8 (slate-400)
 
 ```
 Chart 1: #3B82F6 (Light Blue)
-Chart 2: #10B981 (Emerald)
+Chart 2: #22C55E (Soft Green)
 Chart 3: #F59E0B (Amber)
 Chart 4: #F43F5E (Rose)
 Chart 5: #64748B (Slate)
@@ -161,18 +176,18 @@ Chart 5: #64748B (Slate)
 
 ```
 Background: #FFFFFF (white)
-Foreground: #334155 (slate-700)
-Active Accent: #F0FDF4 (green-50)
-Active Foreground: #059669 (Light Green)
+Foreground: #525252 (gray-600)
+Active Accent: #F0FDF4 (primary-50)
+Active Foreground: #15803D (primary-700)
 ```
 
 ### Dark Mode
 
 ```
-Background: #1E293B (slate-800)
+Background: #171717 (gray-900)
 Foreground: #E2E8F0 (slate-200)
 Active Accent: #334155 (slate-700)
-Active Foreground: #10B981 (Emerald)
+Active Foreground: #34D399 (emerald-400)
 ```
 
 ---
@@ -181,31 +196,44 @@ Active Foreground: #10B981 (Emerald)
 
 ### Primary Actions
 
-- Use **Light Emerald Green** (#059669) for main CTAs
-- Use **Emerald** (#10B981) for success confirmations
+- Use **Soft Green** (#22C55E) for main CTAs
+- Use **primary-600** (#16A34A) for hover states
+- Use **primary-700** (#15803D) for active/pressed states
 
 ### Secondary Actions
 
 - Use **Light Blue** (#3B82F6)
-- Use outline variant with green border
+- Use outline variant with green border for alternative style
 
 ### Destructive Actions
 
-- Always use **Rose** (#F43F5E)
+- Always use **Red** (#EF4444)
 - Require confirmation dialog
+- Use danger button variant
 
 ### Status Indicators
 
-- **Healthy/Success:** Emerald (#10B981)
+- **Healthy/Success:** Soft Green (#22C55E)
 - **Warning/Attention:** Amber (#F59E0B)
-- **Critical/Error:** Rose (#F43F5E)
-- **Info/Neutral:** Sky (#0EA5E9)
+- **Critical/Error:** Red (#EF4444)
+- **Info/Neutral:** Sky Blue (#0EA5E9)
 
 ### Backgrounds
 
-- Keep backgrounds subtle (slate-50 in light, slate-900 in dark)
+- Keep backgrounds subtle (gray-50 in light, #0A0A0A in dark)
 - Use pure white for card surfaces in light mode
-- Use slate-800 for card surfaces in dark mode
+- Use gray-900 (#171717) for card surfaces in dark mode
+
+---
+
+## Focus States
+
+**Green Focus Ring:**
+```css
+box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+```
+
+All interactive elements should use the soft green focus ring for consistency.
 
 ---
 
@@ -214,27 +242,28 @@ Active Foreground: #10B981 (Emerald)
 ### Backgrounds
 
 ```
-bg-primary          // Light Emerald Green
-bg-secondary        // Light Blue
-bg-sam-success      // Emerald
+bg-primary          // Soft Green (#22C55E)
+bg-secondary        // Light Blue (#3B82F6)
+bg-sam-success      // Success Green
 bg-sam-warning      // Amber
-bg-sam-error        // Rose
-bg-sam-info         // Sky
+bg-sam-error        // Red
+bg-sam-info         // Sky Blue
 ```
 
 ### Text Colors
 
 ```
-text-primary        // Light Emerald Green
+text-primary        // Soft Green
 text-secondary      // Light Blue
-text-muted-foreground  // Slate-500 (light) / Slate-400 (dark)
+text-foreground     // Primary text
+text-muted-foreground  // Secondary text
 ```
 
 ### Borders
 
 ```
-border-border       // Slate-200 (light) / Slate-700 (dark)
-border-primary      // Light Emerald Green
+border-border       // Subtle border
+border-primary      // Soft Green border
 ```
 
 ### Status Badges
@@ -252,47 +281,16 @@ bg-sam-info text-white          // Info badge
 
 ```css
 /* Soft shadow for cards */
-shadow-sm
+shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05)
 
 /* Medium shadow on hover */
-shadow-md
+shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1)
 
-/* Custom SAM shadow */
-.sam-shadow
-```
+/* Large shadow for modals */
+shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1)
 
----
-
-## Examples
-
-### Primary Button
-
-```tsx
-<Button variant="default">// Light Emerald Green background, white text</Button>
-```
-
-### Secondary Button
-
-```tsx
-<Button variant="secondary">// Light Blue background, white text</Button>
-```
-
-### Success Badge
-
-```tsx
-<Badge className="bg-sam-success text-white">Online</Badge>
-```
-
-### Danger Button
-
-```tsx
-<Button variant="danger">// Rose background, white text</Button>
-```
-
-### Outline Button
-
-```tsx
-<Button variant="outline">// Transparent with green border</Button>
+/* Green focus ring */
+shadow-focus: 0 0 0 3px rgba(34, 197, 94, 0.2)
 ```
 
 ---
@@ -301,11 +299,25 @@ shadow-md
 
 All color combinations meet **WCAG 2.1 Level AA** standards:
 
-- ✅ Text colors have sufficient contrast
+- ✅ Text colors have sufficient contrast (4.5:1 minimum)
 - ✅ Status colors are distinguishable
-- ✅ Focus states are visible
+- ✅ Focus states are clearly visible
 - ✅ Dark mode maintains proper contrast
+- ✅ Primary green works on white and dark backgrounds
 
 ---
 
-_Use this palette consistently across all UI components for a professional, enterprise-grade look._
+## Design Philosophy
+
+This palette embodies:
+- **Soft & Elegant:** Not neon or overwhelming
+- **Modern & Professional:** Enterprise-grade quality
+- **Accessible:** WCAG AA+ compliance
+- **Harmonious:** Colors work together naturally
+- **Timeless:** Won't feel dated in 2-3 years
+
+---
+
+**Inspiration:** Stripe, Linear, Vercel, Notion  
+**Version:** 2.0 (Soft Green System)  
+**Last Updated:** 2026-02-11

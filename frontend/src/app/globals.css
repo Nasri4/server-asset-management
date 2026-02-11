@@ -46,125 +46,125 @@
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.375rem; /* 6px - md from design system */
 
-  /* Hormuud Telecom (Light Mode) — Enterprise */
-  --background: 255 255 255; /* #FFFFFF */
-  --foreground: 15 23 42; /* #0F172A */
+  /* Soft Green Design System (Light Mode) — Stripe + Linear + Vercel Quality */
+  --background: 250 250 250; /* #FAFAFA - gray-50 */
+  --foreground: 64 64 64; /* #404040 - gray-700 */
 
-  --card: 255 255 255; /* #FFFFFF */
-  --card-foreground: 15 23 42; /* #0F172A */
+  --card: 255 255 255; /* #FFFFFF - white cards */
+  --card-foreground: 64 64 64; /* #404040 - gray-700 */
 
   --popover: 255 255 255;
-  --popover-foreground: 15 23 42;
+  --popover-foreground: 64 64 64;
 
-  /* Brand */
-  --primary: 0 166 81; /* #00A651 */
+  /* Brand - Soft Green Primary */
+  --primary: 34 197 94; /* #22C55E - primary-500 (main brand color) */
   --primary-foreground: 255 255 255;
 
-  --secondary: 0 174 239; /* #00AEEF */
+  --secondary: 59 130 246; /* #3B82F6 - blue-500 (secondary accent) */
   --secondary-foreground: 255 255 255;
 
-  --muted: 246 249 248; /* #F6F9F8 (used for subtle surfaces) */
-  --muted-foreground: 100 116 139; /* #64748B */
+  --muted: 245 245 245; /* #F5F5F5 - gray-100 */
+  --muted-foreground: 115 115 115; /* #737373 - gray-500 */
 
-  --accent: 241 245 249; /* slate-100 */
-  --accent-foreground: 15 23 42;
+  --accent: 245 245 245; /* #F5F5F5 - gray-100 */
+  --accent-foreground: 64 64 64; /* #404040 - gray-700 */
 
-  --destructive: 239 68 68; /* red-500 */
+  --destructive: 239 68 68; /* #EF4444 - error-500 */
 
-  --border: 226 232 240; /* #E2E8F0 */
-  --input: 226 232 240;
-  --ring: 0 174 239; /* Brand Blue focus rings */
+  --border: 229 229 229; /* #E5E5E5 - gray-200 */
+  --input: 212 212 212; /* #D4D4D4 - gray-300 */
+  --ring: 34 197 94; /* #22C55E - Soft Green focus rings */
 
-  /* Status colors (Brand-aligned) */
-  --sam-success: 0 166 81; /* Brand Green */
-  --sam-warning: 245 158 11; /* amber-500 */
-  --sam-error: 239 68 68; /* red-500 */
-  --sam-info: 0 174 239; /* Brand Blue */
+  /* Status colors (Semantic) */
+  --sam-success: 34 197 94; /* #22C55E - primary-500 */
+  --sam-warning: 245 158 11; /* #F59E0B - warning-500 */
+  --sam-error: 239 68 68; /* #EF4444 - error-500 */
+  --sam-info: 14 165 233; /* #0EA5E9 - info-500 */
 
-  /* Soft backgrounds */
-  --sam-success-soft: 236 253 245; /* #ECFDF5 */
-  --sam-warning-soft: 255 251 235; /* #FFFBEB */
-  --sam-error-soft: 254 242 242; /* #FEF2F2 */
-  --sam-info-soft: 224 247 255; /* #E0F7FF */
+  /* Soft backgrounds for status */
+  --sam-success-soft: 240 253 244; /* #F0FDF4 - primary-50 */
+  --sam-warning-soft: 255 251 235; /* #FFFBEB - warning-50 */
+  --sam-error-soft: 254 242 242; /* #FEF2F2 - error-50 */
+  --sam-info-soft: 240 249 255; /* #F0F9FF - info-50 */
 
-  /* Chart colors (Brand-first) */
-  --chart-1: 0 166 81; /* Brand Green */
-  --chart-2: 0 174 239; /* Brand Blue */
-  --chart-3: 245 158 11; /* Amber */
-  --chart-4: 239 68 68; /* Red */
-  --chart-5: 100 116 139; /* slate-500 */
+  /* Chart colors (Harmonious palette) */
+  --chart-1: 59 130 246; /* #3B82F6 - blue-500 */
+  --chart-2: 34 197 94; /* #22C55E - primary-500 */
+  --chart-3: 245 158 11; /* #F59E0B - warning-500 */
+  --chart-4: 244 63 94; /* #F43F5E - rose-500 */
+  --chart-5: 100 116 139; /* #64748B - slate-500 */
 
-  /* Sidebar (Professional Dark - Enterprise) */
-  --sidebar: 30 41 59; /* slate-800 */
-  --sidebar-foreground: 226 232 240; /* slate-200 */
-  --sidebar-primary: 59 130 246; /* blue-500 (active indicator) */
+  /* Sidebar - Clean light sidebar */
+  --sidebar: 255 255 255; /* #FFFFFF - white */
+  --sidebar-foreground: 82 82 82; /* #525252 - gray-600 */
+  --sidebar-primary: 34 197 94; /* #22C55E - soft green for active */
   --sidebar-primary-foreground: 255 255 255;
-  --sidebar-accent: 51 65 85; /* slate-700 (hover/active bg) */
-  --sidebar-accent-foreground: 241 245 249; /* slate-100 */
-  --sidebar-border: 51 65 85; /* slate-700 */
-  --sidebar-ring: 59 130 246; /* blue-500 */
+  --sidebar-accent: 240 253 244; /* #F0FDF4 - primary-50 (hover/active bg) */
+  --sidebar-accent-foreground: 21 128 61; /* #15803D - primary-700 */
+  --sidebar-border: 229 229 229; /* #E5E5E5 - gray-200 */
+  --sidebar-ring: 34 197 94; /* #22C55E - soft green */
 }
 
 .dark {
-  /* Hormuud Telecom (Dark Mode) */
-  --background: 11 31 28; /* #0B1F1C */
-  --foreground: 236 253 245; /* #ECFDF5 */
+  /* Soft Green Design System (Dark Mode) — Premium SaaS */
+  --background: 10 10 10; /* #0A0A0A - dark-bg-primary */
+  --foreground: 250 250 250; /* #FAFAFA - dark-text-primary */
 
-  --card: 19 46 41; /* #132E29 */
-  --card-foreground: 236 253 245;
+  --card: 23 23 23; /* #171717 - dark-bg-surface */
+  --card-foreground: 250 250 250;
 
-  --popover: 19 46 41;
-  --popover-foreground: 236 253 245;
+  --popover: 23 23 23;
+  --popover-foreground: 250 250 250;
 
-  /* Brand remains identical */
-  --primary: 0 166 81; /* #00A651 */
+  /* Brand - Adjusted soft green for dark mode */
+  --primary: 52 211 153; /* #34D399 - brighter green for dark backgrounds */
   --primary-foreground: 255 255 255;
 
-  --secondary: 0 174 239; /* #00AEEF */
+  --secondary: 56 189 248; /* #38BDF8 - adjusted sky blue */
   --secondary-foreground: 255 255 255;
 
-  --muted: 15 47 43; /* #0F2F2B */
-  --muted-foreground: 148 163 184; /* slate-400 */
+  --muted: 38 38 38; /* #262626 - dark-bg-elevated */
+  --muted-foreground: 163 163 163; /* #A3A3A3 - dark-text-muted */
 
-  --accent: 20 65 59; /* #14413B */
-  --accent-foreground: 236 253 245;
+  --accent: 38 38 38; /* #262626 - dark-bg-elevated */
+  --accent-foreground: 250 250 250;
 
-  --destructive: 248 113 113; /* red-400 */
+  --destructive: 248 113 113; /* #F87171 - adjusted red for dark */
 
-  --border: 20 65 59; /* #14413B */
-  --input: 20 65 59;
-  --ring: 0 174 239; /* Brand Blue */
+  --border: 64 64 64; /* #404040 - dark-border */
+  --input: 64 64 64;
+  --ring: 52 211 153; /* #34D399 - Soft Green focus rings (brighter for dark) */
 
-  /* Status colors */
-  --sam-success: 0 166 81;
-  --sam-warning: 245 158 11;
-  --sam-error: 248 113 113;
-  --sam-info: 0 174 239;
+  /* Status colors (Dark mode adjusted) */
+  --sam-success: 52 211 153; /* #34D399 - brighter green */
+  --sam-warning: 251 191 36; /* #FBBF24 - adjusted amber */
+  --sam-error: 248 113 113; /* #F87171 - adjusted red */
+  --sam-info: 56 189 248; /* #38BDF8 - adjusted sky */
 
-  /* Soft backgrounds */
-  --sam-success-soft: 6 78 59; /* #064E3B */
-  --sam-warning-soft: 69 26 3; /* #451A03 */
-  --sam-error-soft: 76 5 25; /* #4C0519 */
-  --sam-info-soft: 12 74 110; /* #0C4A6E */
+  /* Soft backgrounds for status (darker) */
+  --sam-success-soft: 6 78 59; /* #064E3B - emerald-900 */
+  --sam-warning-soft: 69 26 3; /* #451A03 - amber-950 */
+  --sam-error-soft: 76 5 25; /* #4C0519 - rose-950 */
+  --sam-info-soft: 7 89 133; /* #075985 - sky-900 */
 
-  /* Chart colors */
-  --chart-1: 0 166 81;
-  --chart-2: 0 174 239;
-  --chart-3: 245 158 11;
-  --chart-4: 248 113 113;
-  --chart-5: 148 163 184;
+  /* Chart colors (Dark mode) */
+  --chart-1: 56 189 248; /* #38BDF8 - sky-400 */
+  --chart-2: 52 211 153; /* #34D399 - emerald-400 */
+  --chart-3: 251 191 36; /* #FBBF24 - amber-400 */
+  --chart-4: 248 113 113; /* #F87171 - rose-400 */
+  --chart-5: 148 163 184; /* #94A3B8 - slate-400 */
 
-  /* Sidebar (Dark Mode - same as light) */
-  --sidebar: 15 47 43; /* #0F2F2B */
-  --sidebar-foreground: 236 253 245; /* #ECFDF5 */
-  --sidebar-primary: 0 166 81; /* #00A651 */
+  /* Sidebar (Dark Mode) */
+  --sidebar: 23 23 23; /* #171717 - dark-bg-surface */
+  --sidebar-foreground: 226 232 240; /* #E2E8F0 - slate-200 */
+  --sidebar-primary: 52 211 153; /* #34D399 - soft green */
   --sidebar-primary-foreground: 255 255 255;
-  --sidebar-accent: 20 65 59; /* #14413B */
-  --sidebar-accent-foreground: 236 253 245;
-  --sidebar-border: 20 65 59;
-  --sidebar-ring: 0 174 239;
+  --sidebar-accent: 51 65 85; /* #334155 - slate-700 (hover) */
+  --sidebar-accent-foreground: 52 211 153; /* #34D399 - active text green */
+  --sidebar-border: 51 65 85; /* #334155 - slate-700 */
+  --sidebar-ring: 52 211 153; /* #34D399 - soft green */
 }
 
 @layer base {
