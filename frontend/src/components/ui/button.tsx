@@ -5,70 +5,73 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  // Base: Soft Green Design System - modern radius, icon-friendly
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium " +
-    "transition-colors duration-150 " +
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 " +
-    "disabled:pointer-events-none disabled:opacity-50 ring-offset-background " +
+  // Base: reference-style soft surface + modern radius, icon-friendly
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium " +
+    "transition-[color,background-color,border-color,box-shadow,transform] duration-150 " +
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/35 focus-visible:ring-offset-2 " +
+    "active:translate-y-px disabled:pointer-events-none disabled:opacity-50 ring-offset-background " +
     "[&_svg]:pointer-events-none [&_svg]:h-4 [&_svg]:w-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        // Primary: Soft Green (#22C55E)
+        // Neutral surface (matches buttons.png)
         default:
-          "bg-primary text-primary-foreground shadow-sm hover:bg-primary-600 active:bg-primary-700",
+          "border border-border/60 bg-muted/20 text-foreground/90 shadow-xs hover:bg-muted/30 hover:shadow-sm " +
+          "dark:bg-muted/15 dark:hover:bg-muted/25",
 
-        // Secondary action (outline with soft green)
+        // Secondary action (keep neutral)
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-blue-600",
+          "border border-border/60 bg-transparent text-foreground/90 shadow-none hover:bg-muted/20",
 
-        // Success (submit) - uses soft green
+        // Success (submit) - neutral, non-annoying
         success:
-          "bg-primary text-primary-foreground shadow-sm hover:bg-primary-600",
+          "border border-border/60 bg-transparent text-foreground/90 shadow-none hover:bg-muted/20",
 
-        // Warning
+        // Warning - neutral, non-annoying
         warning:
-          "bg-sam-warning text-white shadow-sm hover:bg-amber-600",
+          "border border-border/60 bg-transparent text-foreground/90 shadow-none hover:bg-muted/20",
 
-        // Info
+        // Info - neutral, non-annoying
         info:
-          "bg-sam-info text-white shadow-sm hover:bg-sky-600",
+          "border border-border/60 bg-transparent text-foreground/90 shadow-none hover:bg-muted/20",
 
-        // Destructive
+        // Destructive - subtle red outline (no fill)
         destructive:
-          "bg-destructive text-white shadow-sm hover:bg-red-600 active:bg-red-700",
+          "border border-rose-500/30 bg-transparent text-rose-700 shadow-none hover:bg-rose-500/5 " +
+          "dark:text-rose-400",
 
         // Alias used across the app
         danger:
-          "bg-destructive text-white shadow-sm hover:bg-red-600 active:bg-red-700",
+          "border border-rose-500/30 bg-transparent text-rose-700 shadow-none hover:bg-rose-500/5 " +
+          "dark:text-rose-400",
 
-        // Premium: soft green themed
+        // Premium: keep calm and mostly neutral
         premium:
-          "bg-primary text-primary-foreground shadow-sm hover:bg-primary-600",
+          "border border-border/60 bg-transparent text-foreground/90 shadow-none hover:bg-muted/20",
 
-        // Outline: soft green border
+        // Calm outline
         outline:
-          "border border-primary bg-transparent text-primary-600 shadow-none hover:bg-primary-50 active:bg-primary-100",
+          "border border-border/60 bg-transparent text-foreground/90 shadow-none hover:bg-muted/20",
 
         // Very light action buttons (tables)
         ghost:
-          "bg-transparent text-foreground shadow-none hover:bg-gray-100 active:bg-gray-200",
+          "bg-transparent text-foreground/90 shadow-none hover:bg-muted/20",
 
         // Link
-        link: "text-primary-600 underline-offset-4 hover:underline hover:text-primary-700",
+        link: "text-emerald-700 underline-offset-4 hover:underline dark:text-emerald-400",
       },
       size: {
-        // Default: medium, modern sizing
-        default: "h-10 px-4 py-2",
+        // Default: medium, not bulky
+        default: "h-9 px-4 py-2",
 
         // Small: compact for tables/headers
         sm: "h-8 px-3 py-1.5",
 
-        // Large: prominent actions
-        lg: "h-10 px-6 py-2.5",
+        // Large: still not oversized
+        lg: "h-10 px-5 py-2.5",
 
         // Icon: square, compact
-        icon: "h-10 w-10",
+        icon: "h-9 w-9",
 
         // Alias sizes used across the app
         "icon-sm": "h-8 w-8",
@@ -76,7 +79,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "outline",   // ✅ make outline the default everywhere
       size: "default",
     },
   }

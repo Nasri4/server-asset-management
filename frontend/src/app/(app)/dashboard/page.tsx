@@ -71,21 +71,21 @@ type EngineerRow = {
 // Premium Chart Component with Gradient
 const StatusDistributionChart = ({ total, counts }: { total: number; counts: Record<string, number> }) => {
   const statusConfig = {
-    Active: { color: "from-primary-500 to-primary-600", bg: "bg-primary-50", text: "text-primary-700" },
-    Maintenance: { color: "from-amber-500 to-orange-500", bg: "bg-amber-50", text: "text-amber-700" },
-    Degraded: { color: "from-gray-500 to-gray-600", bg: "bg-gray-100", text: "text-gray-700" },
-    Issue: { color: "from-red-500 to-rose-600", bg: "bg-red-50", text: "text-red-700" },
-    Warning: { color: "from-yellow-500 to-orange-400", bg: "bg-yellow-50", text: "text-yellow-700" },
-    Down: { color: "from-red-500 to-red-600", bg: "bg-red-50", text: "text-red-700" },
+    Active: { color: "from-emerald-500 to-green-500", bg: "bg-emerald-500/10", text: "text-emerald-700" },
+    Maintenance: { color: "from-amber-500 to-orange-500", bg: "bg-amber-500/10", text: "text-amber-700" },
+    Degraded: { color: "from-slate-500 to-gray-500", bg: "bg-slate-500/10", text: "text-slate-700" },
+    Issue: { color: "from-rose-500 to-pink-500", bg: "bg-rose-500/10", text: "text-rose-700" },
+    Warning: { color: "from-yellow-500 to-orange-400", bg: "bg-yellow-500/10", text: "text-yellow-700" },
+    Down: { color: "from-red-500 to-rose-600", bg: "bg-red-500/10", text: "text-red-700" },
   };
 
   const totalSafe = total > 0 ? total : 1;
   const items = Object.entries(counts)
     .map(([key, count]) => {
       const config = statusConfig[key as keyof typeof statusConfig] || {
-        color: "from-gray-500 to-gray-600",
-        bg: "bg-gray-100",
-        text: "text-gray-700"
+        color: "from-slate-500 to-gray-500",
+        bg: "bg-slate-500/10",
+        text: "text-slate-700"
       };
       return {
         key,
@@ -129,8 +129,8 @@ function TrendIndicator({ value, label }: { value: number; label: string }) {
   return (
     <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
       isPositive 
-        ? "bg-primary-50 text-primary-700 border border-primary-200" 
-        : "bg-red-50 text-red-700 border border-red-200"
+        ? "bg-emerald-50 text-emerald-700 border border-emerald-200" 
+        : "bg-rose-50 text-rose-700 border border-rose-200"
     }`}>
       {isPositive ? (
         <ArrowUpRight className="h-3 w-3" />
@@ -138,7 +138,7 @@ function TrendIndicator({ value, label }: { value: number; label: string }) {
         <ArrowDownRight className="h-3 w-3" />
       )}
       <span>{Math.abs(value)}%</span>
-      <span className="text-gray-500 ml-1">{label}</span>
+      <span className="text-slate-500 ml-1">{label}</span>
     </div>
   );
 }
@@ -165,11 +165,11 @@ function PremiumMetricCard({
 }) {
   const colorConfig = {
     blue: { bg: "bg-blue-50", border: "border-blue-100", text: "text-blue-600" },
-    green: { bg: "bg-primary-50", border: "border-primary-100", text: "text-primary-600" },
+    green: { bg: "bg-emerald-50", border: "border-emerald-100", text: "text-emerald-600" },
     amber: { bg: "bg-amber-50", border: "border-amber-100", text: "text-amber-600" },
-    red: { bg: "bg-red-50", border: "border-red-100", text: "text-red-600" },
+    red: { bg: "bg-rose-50", border: "border-rose-100", text: "text-rose-600" },
     purple: { bg: "bg-purple-50", border: "border-purple-100", text: "text-purple-600" },
-    slate: { bg: "bg-gray-100", border: "border-gray-200", text: "text-gray-600" },
+    slate: { bg: "bg-slate-50", border: "border-slate-100", text: "text-slate-600" },
   };
 
   const config = colorConfig[color];
@@ -229,9 +229,9 @@ function StatusBadge({ status }: { status?: string }) {
       border: "border border-amber-200",
     },
     Resolved: {
-      color: "text-primary-700",
-      bg: "bg-gradient-to-r from-primary-50 to-primary-100",
-      border: "border border-primary-200",
+      color: "text-emerald-700",
+      bg: "bg-gradient-to-r from-emerald-50 to-green-50",
+      border: "border border-emerald-200",
     },
     Scheduled: {
       color: "text-purple-700",
@@ -362,7 +362,7 @@ export default function DashboardPage() {
               <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
               <div className="mt-2 flex items-center gap-3 text-sm text-slate-600">
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-primary-500"></div>
+                  <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
                   <span>Welcome back, {user?.fullName || user?.username}</span>
                 </div>
                 {lastUpdatedAt && (
@@ -391,7 +391,7 @@ export default function DashboardPage() {
                 <Button 
                   size="sm" 
                   asChild
-                  className="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white border-0 shadow-md hover:shadow-lg transition-shadow duration-200 font-medium"
+                  className="bg-linear-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white border-0 shadow-md hover:shadow-lg transition-shadow duration-200 font-medium"
                 >
                   <Link href="/servers/new">
                     <Plus className="mr-2 h-4 w-4" />
@@ -435,7 +435,7 @@ export default function DashboardPage() {
                 icon={AlertTriangle}
                 trend={{ value: -25, label: "vs last week" }}
                 color={stats?.active_incidents ? "red" : "green"}
-                gradient={stats?.active_incidents ? "from-red-500 to-rose-600" : "from-primary-500 to-primary-600"}
+                gradient={stats?.active_incidents ? "from-rose-500 to-pink-500" : "from-emerald-500 to-green-500"}
                 onClick={() => (window.location.href = "/incidents")}
               />
 
@@ -457,7 +457,7 @@ export default function DashboardPage() {
                 icon={Activity}
                 trend={{ value: 2.1, label: "improvement" }}
                 color="green"
-                gradient="from-primary-500 to-primary-600"
+                gradient="from-emerald-500 to-green-500"
               />
             </>
           )}
@@ -492,8 +492,8 @@ export default function DashboardPage() {
                   </div>
                 ) : incidents.length === 0 ? (
                   <div className="text-center py-8">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary-50 mb-3">
-                      <CheckCircle2 className="h-6 w-6 text-primary-500" />
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-50 mb-3">
+                      <CheckCircle2 className="h-6 w-6 text-emerald-500" />
                     </div>
                     <h3 className="text-sm font-medium text-slate-900 mb-1">All Systems Operational</h3>
                     <p className="text-xs text-slate-500">No active incidents at this time</p>
@@ -659,7 +659,7 @@ export default function DashboardPage() {
             />
 
             {/* Quick Actions Card */}
-            <Card className="border-primary-100 bg-gradient-to-b from-primary-50 to-white">
+            <Card className="border-emerald-100 bg-linear-to-b from-emerald-50 to-white">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold text-slate-900">Quick Actions</CardTitle>
               </CardHeader>
@@ -667,7 +667,7 @@ export default function DashboardPage() {
                 <div className="space-y-2">
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start border-primary-200 hover:border-primary-300 hover:bg-primary-50"
+                    className="w-full justify-start border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50"
                     asChild
                   >
                     <Link href="/servers">
