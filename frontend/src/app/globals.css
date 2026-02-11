@@ -96,15 +96,15 @@
   --chart-4: 244 63 94; /* #F43F5E - rose-500 */
   --chart-5: 100 116 139; /* #64748B - slate-500 */
 
-  /* Sidebar - Deep Green Theme */
-  --sidebar: 15 47 43; /* #0F2F2B - deep green */
+  /* Sidebar - Premium Deep Blue Theme */
+  --sidebar: 15 23 42; /* #0F172A - deep navy blue */
   --sidebar-foreground: 226 232 240; /* #E2E8F0 - light text */
-  --sidebar-primary: 34 197 94; /* #22C55E - soft green for active */
+  --sidebar-primary: 59 130 246; /* #3B82F6 - bright blue for active */
   --sidebar-primary-foreground: 255 255 255;
-  --sidebar-accent: 20 65 59; /* #14413B - darker green for hover */
-  --sidebar-accent-foreground: 240 253 244; /* #F0FDF4 - light green text */
-  --sidebar-border: 32 82 75; /* #20524B - green border */
-  --sidebar-ring: 34 197 94; /* #22C55E - soft green */
+  --sidebar-accent: 30 41 59; /* #1E293B - darker blue for hover */
+  --sidebar-accent-foreground: 147 197 253; /* #93C5FD - light blue text */
+  --sidebar-border: 51 65 85; /* #334155 - blue-gray border */
+  --sidebar-ring: 59 130 246; /* #3B82F6 - bright blue */
 }
 
 .dark {
@@ -156,15 +156,15 @@
   --chart-4: 248 113 113; /* #F87171 - rose-400 */
   --chart-5: 148 163 184; /* #94A3B8 - slate-400 */
 
-  /* Sidebar (Dark Mode) - Deep Green Theme */
-  --sidebar: 11 31 28; /* #0B1F1C - darker green for dark mode */
+  /* Sidebar (Dark Mode) - Premium Deep Blue/Black Theme */
+  --sidebar: 8 10 17; /* #08090B - pitch black for dark mode */
   --sidebar-foreground: 226 232 240; /* #E2E8F0 - slate-200 */
-  --sidebar-primary: 52 211 153; /* #34D399 - soft green */
+  --sidebar-primary: 96 165 250; /* #60A5FA - bright blue */
   --sidebar-primary-foreground: 255 255 255;
-  --sidebar-accent: 19 46 41; /* #132E29 - dark green hover */
-  --sidebar-accent-foreground: 52 211 153; /* #34D399 - active text green */
-  --sidebar-border: 32 82 75; /* #20524B - green border */
-  --sidebar-ring: 52 211 153; /* #34D399 - soft green */
+  --sidebar-accent: 20 26 38; /* #141A26 - very dark blue hover */
+  --sidebar-accent-foreground: 147 197 253; /* #93C5FD - light blue text */
+  --sidebar-border: 30 41 59; /* #1E293B - dark blue border */
+  --sidebar-ring: 96 165 250; /* #60A5FA - bright blue */
 }
 
 @layer base {
