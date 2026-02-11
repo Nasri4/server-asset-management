@@ -1,0 +1,5 @@
+node_modules
+dist
+.env
+.sam_credentials_key
+.sam_jwt_secret
