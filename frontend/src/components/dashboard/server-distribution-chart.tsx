@@ -19,6 +19,12 @@ interface ServerDistributionChartProps {
   loading?: boolean;
 }
 
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+}
+
 // Mock data for server distribution by location
 const generateServerDistributionData = () => {
   const locations = ["Data Center 1", "Data Center 2", "Cloud AWS", "Cloud Azure", "Edge Nodes"];
@@ -28,6 +34,26 @@ const generateServerDistributionData = () => {
     development: Math.floor(Math.random() * 20) + 5,
     backup: Math.floor(Math.random() * 15) + 3,
   }));
+};
+
+const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
+  if (active && payload && payload.length) {
+    const total = payload.reduce((sum, entry) => sum + entry.value, 0);
+    return (
+      <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
+        <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">{label}</p>
+        {payload.map((entry, index) => (
+          <p key={`tooltip-${index}`} className="text-xs text-slate-600 dark:text-slate-300">
+            <span style={{ color: entry.color }}>●</span> {entry.name}: {entry.value}
+          </p>
+        ))}
+        <p className="text-xs font-semibold text-slate-900 dark:text-white mt-2 pt-2 border-t border-slate-200">
+          Total: {total} servers
+        </p>
+      </div>
+    );
+  }
+  return null;
 };
 
 export function ServerDistributionChart({ loading }: ServerDistributionChartProps) {
@@ -48,26 +74,6 @@ export function ServerDistributionChart({ loading }: ServerDistributionChartProp
       </Card>
     );
   }
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const total = payload.reduce((sum: number, entry: any) => sum + entry.value, 0);
-      return (
-        <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
-          <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={`tooltip-${index}`} className="text-xs text-slate-600 dark:text-slate-300">
-              <span style={{ color: entry.color }}>●</span> {entry.name}: {entry.value}
-            </p>
-          ))}
-          <p className="text-xs font-semibold text-slate-900 dark:text-white mt-2 pt-2 border-t border-slate-200">
-            Total: {total} servers
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <Card className="border-slate-200">

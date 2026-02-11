@@ -11,6 +11,15 @@ interface ServerStatusDonutChartProps {
   loading?: boolean;
 }
 
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string; payload: { value: number } }>;
+}
+
+interface LegendProps {
+  payload?: Array<{ value: string; color: string; payload: { value: number } }>;
+}
+
 const STATUS_COLORS: Record<string, string> = {
   Active: "#22C55E", // Soft Green
   Maintenance: "#F59E0B", // Amber
@@ -19,6 +28,43 @@ const STATUS_COLORS: Record<string, string> = {
   Warning: "#FBBF24", // Yellow
   Down: "#EF4444", // Red
   Unknown: "#9CA3AF", // Gray
+};
+
+const CustomTooltip = ({ active, payload }: TooltipProps, total: number) => {
+  if (active && payload && payload.length) {
+    const data = payload[0];
+    const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : 0;
+    return (
+      <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
+        <p className="text-sm font-semibold text-slate-900 dark:text-white">{data.name}</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          {data.value} servers ({percentage}%)
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
+const CustomLegend = ({ payload }: LegendProps, total: number) => {
+  return (
+    <div className="flex flex-wrap gap-3 justify-center mt-4">
+      {payload?.map((entry, index) => {
+        const percentage = total > 0 ? ((entry.payload.value / total) * 100).toFixed(1) : 0;
+        return (
+          <div key={`legend-${index}`} className="flex items-center gap-2">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className="text-xs text-slate-700 dark:text-slate-300">
+              {entry.value} ({percentage}%)
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
 };
 
 export function ServerStatusDonutChart({ data, loading }: ServerStatusDonutChartProps) {
@@ -73,43 +119,6 @@ export function ServerStatusDonutChart({ data, loading }: ServerStatusDonutChart
     );
   }
 
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      const data = payload[0];
-      const percentage = total > 0 ? ((data.value / total) * 100).toFixed(1) : 0;
-      return (
-        <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
-          <p className="text-sm font-semibold text-slate-900 dark:text-white">{data.name}</p>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            {data.value} servers ({percentage}%)
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const CustomLegend = ({ payload }: any) => {
-    return (
-      <div className="flex flex-wrap gap-3 justify-center mt-4">
-        {payload.map((entry: any, index: number) => {
-          const percentage = total > 0 ? ((entry.payload.value / total) * 100).toFixed(1) : 0;
-          return (
-            <div key={`legend-${index}`} className="flex items-center gap-2">
-              <div
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-xs text-slate-700 dark:text-slate-300">
-                {entry.value} ({percentage}%)
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
   return (
     <Card className="border-slate-200">
       <CardHeader className="pb-3">
@@ -135,8 +144,8 @@ export function ServerStatusDonutChart({ data, loading }: ServerStatusDonutChart
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
-            <Tooltip content={<CustomTooltip />} />
-            <Legend content={<CustomLegend />} />
+            <Tooltip content={(props) => CustomTooltip(props, total)} />
+            <Legend content={(props) => CustomLegend(props, total)} />
           </PieChart>
         </ResponsiveContainer>
         

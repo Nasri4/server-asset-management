@@ -19,15 +19,37 @@ interface MaintenanceTrendChartProps {
   loading?: boolean;
 }
 
+interface TooltipProps {
+  active?: boolean;
+  payload?: Array<{ name: string; value: number; color: string }>;
+  label?: string;
+}
+
 // Mock data for maintenance trends (7 days)
 const generateMaintenanceTrendData = () => {
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-  return days.map((day, index) => ({
+  return days.map((day) => ({
     name: day,
     completed: Math.floor(Math.random() * 15) + 5,
     scheduled: Math.floor(Math.random() * 10) + 3,
     overdue: Math.floor(Math.random() * 5),
   }));
+};
+
+const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
+        <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">{label}</p>
+        {payload.map((entry, index) => (
+          <p key={`tooltip-${index}`} className="text-xs text-slate-600 dark:text-slate-300">
+            <span style={{ color: entry.color }}>●</span> {entry.name}: {entry.value}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
 };
 
 export function MaintenanceTrendChart({ loading }: MaintenanceTrendChartProps) {
@@ -48,22 +70,6 @@ export function MaintenanceTrendChart({ loading }: MaintenanceTrendChartProps) {
       </Card>
     );
   }
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
-          <p className="text-sm font-semibold text-slate-900 dark:text-white mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={`tooltip-${index}`} className="text-xs text-slate-600 dark:text-slate-300">
-              <span style={{ color: entry.color }}>●</span> {entry.name}: {entry.value}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <Card className="border-slate-200">
