@@ -33,23 +33,23 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
 
   const statusConfig = {
     active: {
-      container: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30",
-      dot: "bg-emerald-500",
+      container: "bg-primary-50 text-primary-700 border-primary-200 dark:bg-primary-900/20 dark:text-primary-400 dark:border-primary-900/30",
+      dot: "bg-primary-500",
     },
     inactive: {
-      container: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-950/20 dark:text-slate-400 dark:border-slate-900/30",
-      dot: "bg-slate-400",
+      container: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-900/30",
+      dot: "bg-gray-400",
     },
     maintenance: {
       container: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30",
       dot: "bg-amber-500",
     },
     offline: {
-      container: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30",
-      dot: "bg-rose-500",
+      container: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/30",
+      dot: "bg-red-500",
     },
     decommissioned: {
-      container: "bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-950/20 dark:text-gray-500 dark:border-gray-900/30",
+      container: "bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-950/20 dark:text-gray-500 dark:border-gray-900/30",
       dot: "bg-gray-400",
     },
   };

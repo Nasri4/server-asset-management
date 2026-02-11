@@ -71,21 +71,21 @@ type EngineerRow = {
 // Premium Chart Component with Gradient
 const StatusDistributionChart = ({ total, counts }: { total: number; counts: Record<string, number> }) => {
   const statusConfig = {
-    Active: { color: "from-emerald-500 to-green-500", bg: "bg-emerald-500/10", text: "text-emerald-700" },
-    Maintenance: { color: "from-amber-500 to-orange-500", bg: "bg-amber-500/10", text: "text-amber-700" },
-    Degraded: { color: "from-slate-500 to-gray-500", bg: "bg-slate-500/10", text: "text-slate-700" },
-    Issue: { color: "from-rose-500 to-pink-500", bg: "bg-rose-500/10", text: "text-rose-700" },
-    Warning: { color: "from-yellow-500 to-orange-400", bg: "bg-yellow-500/10", text: "text-yellow-700" },
-    Down: { color: "from-red-500 to-rose-600", bg: "bg-red-500/10", text: "text-red-700" },
+    Active: { color: "from-primary-500 to-primary-600", bg: "bg-primary-50", text: "text-primary-700" },
+    Maintenance: { color: "from-amber-500 to-orange-500", bg: "bg-amber-50", text: "text-amber-700" },
+    Degraded: { color: "from-gray-500 to-gray-600", bg: "bg-gray-100", text: "text-gray-700" },
+    Issue: { color: "from-red-500 to-rose-600", bg: "bg-red-50", text: "text-red-700" },
+    Warning: { color: "from-yellow-500 to-orange-400", bg: "bg-yellow-50", text: "text-yellow-700" },
+    Down: { color: "from-red-500 to-red-600", bg: "bg-red-50", text: "text-red-700" },
   };
 
   const totalSafe = total > 0 ? total : 1;
   const items = Object.entries(counts)
     .map(([key, count]) => {
       const config = statusConfig[key as keyof typeof statusConfig] || {
-        color: "from-slate-500 to-gray-500",
-        bg: "bg-slate-500/10",
-        text: "text-slate-700"
+        color: "from-gray-500 to-gray-600",
+        bg: "bg-gray-100",
+        text: "text-gray-700"
       };
       return {
         key,
@@ -129,8 +129,8 @@ function TrendIndicator({ value, label }: { value: number; label: string }) {
   return (
     <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
       isPositive 
-        ? "bg-emerald-50 text-emerald-700 border border-emerald-200" 
-        : "bg-rose-50 text-rose-700 border border-rose-200"
+        ? "bg-primary-50 text-primary-700 border border-primary-200" 
+        : "bg-red-50 text-red-700 border border-red-200"
     }`}>
       {isPositive ? (
         <ArrowUpRight className="h-3 w-3" />
@@ -138,7 +138,7 @@ function TrendIndicator({ value, label }: { value: number; label: string }) {
         <ArrowDownRight className="h-3 w-3" />
       )}
       <span>{Math.abs(value)}%</span>
-      <span className="text-slate-500 ml-1">{label}</span>
+      <span className="text-gray-500 ml-1">{label}</span>
     </div>
   );
 }
