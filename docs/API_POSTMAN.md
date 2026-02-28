@@ -40,7 +40,7 @@ If you removed the default admin user from seed, the `users` table will be empty
 
 **403:** There is already at least one user; use the admin “Create user” flow instead (step 4).
 
-## 3. Log in
+## 3. Log in (Step 1: Password)
 
 - **Method:** `POST`
 - **URL:** `http://localhost:5000/api/auth/login`
@@ -54,9 +54,35 @@ If you removed the default admin user from seed, the `users` table will be empty
 }
 ```
 
-**Success (200):** Response includes `token` and `user`. Copy the `token` for the next step.
+**Success (200):** Response includes `requiresOtp: true` and `tempAuthId`.
 
-## 4. Create more users (admin only)
+Example:
+
+```json
+{
+  "requiresOtp": true,
+  "tempAuthId": "eyJ...",
+  "message": "OTP sent"
+}
+```
+
+## 4. Verify OTP (Step 2)
+
+- **Method:** `POST`
+- **URL:** `http://localhost:5000/api/auth/verify-otp`
+- **Headers:** `Content-Type: application/json`
+- **Body (raw JSON):**
+
+```json
+{
+  "otp": "123456",
+  "tempAuthId": "<value from login response>"
+}
+```
+
+**Success (200):** Response includes `success: true`, `token`, and `user`.
+
+## 5. Create more users (admin only)
 
 - **Method:** `POST`
 - **URL:** `http://localhost:5000/api/admin/users`
@@ -89,7 +115,8 @@ If you removed the default admin user from seed, the `users` table will be empty
 | Step | Endpoint | Auth |
 |------|----------|------|
 | Create first user | `POST /api/auth/bootstrap` | None |
-| Log in | `POST /api/auth/login` | None |
+| Log in (password) | `POST /api/auth/login` | None |
+| Verify OTP | `POST /api/auth/verify-otp` | None |
 | Create more users | `POST /api/admin/users` | Bearer token (admin) |
 
 Base URL: `http://localhost:5000` (or your `NEXT_PUBLIC_API_URL` / backend URL).

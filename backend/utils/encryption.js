@@ -1,16 +1,45 @@
-const CryptoJS = require('crypto-js');
+const encryptionService = require('../services/encryption.service');
 
-const ENCRYPTION_KEY = process.env.CREDENTIAL_ENCRYPTION_KEY || 'default-key-change-in-production!';
+function serializeEncryptedPayload(payload) {
+  return `enc:${payload.keyVersion}:${payload.iv}:${payload.authTag}:${payload.ciphertext}`;
+}
+
+function parseEncryptedPayload(value) {
+  if (typeof value !== 'string') return null;
+  if (!value.startsWith('enc:')) return null;
+
+  const parts = value.split(':');
+  if (parts.length !== 5) {
+    throw new Error('Invalid encrypted payload format.');
+  }
+
+  const [, keyVersion, iv, authTag, ciphertext] = parts;
+  if (!keyVersion || !iv || !authTag || !ciphertext) {
+    throw new Error('Invalid encrypted payload format.');
+  }
+
+  return { keyVersion, iv, authTag, ciphertext };
+}
 
 function encrypt(text) {
-  if (!text) return null;
-  return CryptoJS.AES.encrypt(text, ENCRYPTION_KEY).toString();
+  if (text === null || text === undefined || text === '') return null;
+  const payload = encryptionService.encrypt(String(text));
+  return serializeEncryptedPayload(payload);
 }
 
 function decrypt(cipherText) {
   if (!cipherText) return null;
-  const bytes = CryptoJS.AES.decrypt(cipherText, ENCRYPTION_KEY);
-  return bytes.toString(CryptoJS.enc.Utf8);
+
+  if (typeof cipherText !== 'string') {
+    throw new Error('Invalid encrypted value type.');
+  }
+
+  const parsed = parseEncryptedPayload(cipherText);
+  if (!parsed) {
+    return cipherText;
+  }
+
+  return encryptionService.decrypt(parsed);
 }
 
 module.exports = { encrypt, decrypt };

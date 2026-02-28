@@ -27,6 +27,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const otpRoutes = require('./routes/otp');
 const visitsRoutes = require('./routes/visits');
 const searchRoutes = require('./routes/search');
+const { runDueMaintenanceScheduler } = require('./services/maintenanceScheduler.service');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -110,6 +111,21 @@ async function startServer() {
       console.warn('SMS: not configured. Set SMS_API_TOKEN_URL, SMS_API_SEND_URL, SMS_API_USERNAME, SMS_API_PASSWORD in .env to send SMS.');
     }
   });
+
+  const schedulerEnabled = process.env.MAINTENANCE_SCHEDULER_ENABLED !== 'false';
+  const schedulerEveryMs = parseInt(process.env.MAINTENANCE_SCHEDULER_EVERY_MS || '60000', 10);
+  if (schedulerEnabled) {
+    const runScheduler = async () => {
+      try {
+        await runDueMaintenanceScheduler();
+      } catch (error) {
+        console.error('Maintenance scheduler error:', error.message || error);
+      }
+    };
+    runScheduler().catch(() => {});
+    setInterval(runScheduler, Number.isNaN(schedulerEveryMs) ? 60000 : Math.max(15000, schedulerEveryMs));
+  }
+
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
       console.error('Port ' + PORT + ' is already in use. Stop the other process using this port or set PORT to a different number in .env.');

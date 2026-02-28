@@ -4,6 +4,20 @@ const { query, isDemoMode } = require('../config/db');
 let cachedToken = null;
 let tokenExpiry = null;
 
+// Hard timeouts so a slow/dead provider never blocks the thread
+const TOKEN_TIMEOUT_MS = 4000;
+const SEND_TIMEOUT_MS  = 5000;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRetryableError(err) {
+  const status = err?.response?.status;
+  if (!status) return true;
+  return status >= 500 || status === 429;
+}
+
 function isSmsConfigured() {
   const url = process.env.SMS_API_TOKEN_URL;
   const sendUrl = process.env.SMS_API_SEND_URL;
@@ -20,25 +34,37 @@ async function getToken() {
     return cachedToken;
   }
 
-  try {
-    const response = await axios.post(
-      process.env.SMS_API_TOKEN_URL,
-      new URLSearchParams({
-        grant_type: 'password',
-        username: process.env.SMS_API_USERNAME,
-        password: process.env.SMS_API_PASSWORD,
-      }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    );
+  const maxAttempts = 2;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const response = await axios.post(
+        process.env.SMS_API_TOKEN_URL,
+        new URLSearchParams({
+          grant_type: 'password',
+          username: process.env.SMS_API_USERNAME,
+          password: process.env.SMS_API_PASSWORD,
+        }),
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, timeout: TOKEN_TIMEOUT_MS }
+      );
 
-    cachedToken = response.data.access_token;
-    tokenExpiry = new Date(Date.now() + (response.data.expires_in - 60) * 1000);
-    return cachedToken;
-  } catch (err) {
-    console.error('SMS token fetch failed:', err.message);
-    if (err.response?.data) console.error('SMS API response:', err.response.data);
-    throw new Error('SMS authentication failed');
+      cachedToken = response.data.access_token;
+      const expiresIn = Number(response.data.expires_in) || 300;
+      tokenExpiry = new Date(Date.now() + Math.max(expiresIn - 60, 30) * 1000);
+      return cachedToken;
+    } catch (err) {
+      const status = err?.response?.status || 'NO_STATUS';
+      console.error(`SMS token fetch failed (attempt ${attempt}/${maxAttempts}, status: ${status})`);
+
+      if (attempt < maxAttempts && isRetryableError(err)) {
+        await sleep(100 * attempt); // was 300 * attempt
+        continue;
+      }
+
+      throw new Error('SMS authentication failed');
+    }
   }
+
+  throw new Error('SMS authentication failed');
 }
 
 async function sendSMS(recipient, message, smsType = 'general', entityType = null, entityId = null) {
@@ -51,26 +77,47 @@ async function sendSMS(recipient, message, smsType = 'general', entityType = nul
     return { success: false, error: 'SMS not configured' };
   }
   try {
-    const token = await getToken();
+    let response = null;
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        const token = await getToken();
+        response = await axios.post(
+          process.env.SMS_API_SEND_URL,
+          {
+            mobile: recipient,
+            message: message,
+            senderid: process.env.SMS_SENDER_ID || 'TELCO_MGMT',
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            timeout: SEND_TIMEOUT_MS,
+          }
+        );
+        break;
+      } catch (sendErr) {
+        const status = sendErr?.response?.status;
 
-    const response = await axios.post(
-      process.env.SMS_API_SEND_URL,
-      {
-        mobile: recipient,
-        message: message,
-        senderid: process.env.SMS_SENDER_ID || 'TELCO_MGMT',
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        if (status === 401) {
+          cachedToken = null;
+          tokenExpiry = null;
+        }
+
+        if (attempt < maxAttempts && isRetryableError(sendErr)) {
+          await sleep(100 * attempt); // was 300 * attempt
+          continue;
+        }
+
+        throw sendErr;
       }
-    );
+    }
 
     if (!isDemoMode()) {
-      try {
-        await query(
+      // fire-and-forget — don't block the caller on a DB log write
+      query(
           `INSERT INTO sms_log (recipient, message, sms_type, status, provider_response, related_entity, entity_id)
            VALUES (@recipient, @message, @sms_type, @status, @response, @entity, @entity_id)`,
           {
@@ -82,13 +129,10 @@ async function sendSMS(recipient, message, smsType = 'general', entityType = nul
             entity: entityType,
             entity_id: entityId,
           }
-        );
-      } catch (logErr) {
-        console.error('SMS log insert failed:', logErr.message);
-      }
+        ).catch(logErr => console.error('SMS log insert failed:', logErr.message));
     }
 
-    return { success: true, data: response.data };
+    return { success: true, data: response?.data };
   } catch (err) {
     if (!isDemoMode()) {
       try {
@@ -99,7 +143,7 @@ async function sendSMS(recipient, message, smsType = 'general', entityType = nul
             recipient,
             message,
             sms_type: smsType,
-            response: err.message,
+            response: `status=${err?.response?.status || 'NO_STATUS'}`,
             entity: entityType,
             entity_id: entityId,
           }
@@ -108,9 +152,14 @@ async function sendSMS(recipient, message, smsType = 'general', entityType = nul
         console.error('SMS log insert failed:', logErr.message);
       }
     }
-    console.error('SMS send failed:', err.message);
-    return { success: false, error: err.message };
+    console.error(`SMS send failed (status: ${err?.response?.status || 'NO_STATUS'})`);
+    return { success: false, error: 'SMS provider error' };
   }
 }
 
 module.exports = { sendSMS, isSmsConfigured };
+
+// Pre-warm the auth token at startup so the first OTP send is instant
+if (isSmsConfigured()) {
+  getToken().catch(() => {});
+}

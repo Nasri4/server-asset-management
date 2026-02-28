@@ -19,12 +19,12 @@ async function authenticate(req, res, next) {
 
     const result = await query(
       `SELECT u.user_id, u.username, u.full_name, u.email, u.phone,
-              u.department_id, u.team_id, u.is_active,
+              u.department_id, u.section_id, u.team_id, u.engineer_id as linked_engineer_id, u.is_active,
               r.role_name, r.role_id, r.level as role_level,
-              e.engineer_id
+              COALESCE(u.engineer_id, e.engineer_id) AS engineer_id
        FROM users u
        JOIN roles r ON u.role_id = r.role_id
-       LEFT JOIN engineers e ON u.user_id = e.user_id
+       LEFT JOIN engineers e ON e.user_id = u.user_id
        WHERE u.user_id = @user_id AND u.is_active = 1`,
       { user_id: decoded.userId }
     );

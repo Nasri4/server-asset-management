@@ -332,6 +332,7 @@ CREATE TABLE server_monitoring (
 CREATE TABLE maintenance (
     maintenance_id INT IDENTITY(1,1) PRIMARY KEY,
     server_id INT NOT NULL,
+    template_id INT,
     maintenance_type NVARCHAR(50) NOT NULL,
     title NVARCHAR(200) NOT NULL,
     description NVARCHAR(500),
@@ -346,6 +347,10 @@ CREATE TABLE maintenance (
     notify_engineer BIT DEFAULT 1,
     sms_sent BIT DEFAULT 0,
     reminder_sent BIT DEFAULT 0,
+    recurrence_type NVARCHAR(50),
+    recurrence_interval INT,
+    next_scheduled_date DATETIME,
+    checklist_tasks NVARCHAR(MAX),
     completion_notes NVARCHAR(500),
     created_by INT,
     created_at DATETIME DEFAULT GETDATE(),
@@ -353,6 +358,44 @@ CREATE TABLE maintenance (
     FOREIGN KEY (server_id) REFERENCES servers(server_id),
     FOREIGN KEY (assigned_engineer_id) REFERENCES engineers(engineer_id),
     FOREIGN KEY (created_by) REFERENCES users(user_id)
+);
+
+-- ============================================================
+-- MAINTENANCE TEMPLATES
+-- ============================================================
+CREATE TABLE maintenance_templates (
+    template_id INT IDENTITY(1,1) PRIMARY KEY,
+    template_name NVARCHAR(120) NOT NULL,
+    maintenance_type NVARCHAR(50) NOT NULL,
+    default_priority NVARCHAR(20),
+    default_description NVARCHAR(500),
+    checklist_tasks NVARCHAR(MAX),
+    is_active BIT DEFAULT 1,
+    created_by INT,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (created_by) REFERENCES users(user_id)
+);
+
+ALTER TABLE maintenance
+ADD CONSTRAINT FK_maintenance_template_id FOREIGN KEY (template_id) REFERENCES maintenance_templates(template_id);
+
+-- ============================================================
+-- MAINTENANCE RUNS (History)
+-- ============================================================
+CREATE TABLE maintenance_runs (
+    run_id INT IDENTITY(1,1) PRIMARY KEY,
+    maintenance_id INT NOT NULL,
+    run_status NVARCHAR(30) NOT NULL DEFAULT 'Pending',
+    run_result NVARCHAR(30),
+    started_at DATETIME,
+    completed_at DATETIME,
+    completion_notes NVARCHAR(1000),
+    completed_by INT,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (maintenance_id) REFERENCES maintenance(maintenance_id),
+    FOREIGN KEY (completed_by) REFERENCES users(user_id)
 );
 
 -- ============================================================

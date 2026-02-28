@@ -35,6 +35,8 @@ Thumbs.db
 # Uploads / temp
 uploads/
 temp/
+*_tmp.json
+login_tmp.json
 
 # Secrets
 config/secrets/

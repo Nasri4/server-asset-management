@@ -22,8 +22,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && typeof window !== 'undefined') {
-      const isLoginRequest = error.config?.url?.includes('/auth/login');
-      if (!isLoginRequest) {
+      const url = error.config?.url || '';
+      const isAuthFlowRequest =
+        url.includes('/auth/login') ||
+        url.includes('/auth/verify-otp') ||
+        url.includes('/auth/resend-otp');
+      if (!isAuthFlowRequest) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = '/login';

@@ -8,12 +8,13 @@ const { auditMiddleware } = require('../middleware/audit');
 router.get('/', authenticate, requirePermission('engineers.read'), async (req, res) => {
   try {
     const scope = scopeFilter(req);
-    let sql = `SELECT e.*, t.team_name, d.department_name, u.username as linked_username,
+    let sql = `SELECT e.*, t.team_name, d.department_name,
+      lu.user_id as linked_user_id, lu.username as linked_username,
       (SELECT COUNT(*) FROM server_assignments sa WHERE sa.engineer_id = e.engineer_id AND sa.unassigned_at IS NULL) as assigned_servers
      FROM engineers e
      LEFT JOIN teams t ON e.team_id = t.team_id
-     LEFT JOIN departments d ON t.department_id = d.department_id
-     LEFT JOIN users u ON e.user_id = u.user_id
+     LEFT JOIN departments d ON COALESCE(e.department_id, t.department_id) = d.department_id
+     LEFT JOIN users lu ON (lu.engineer_id = e.engineer_id OR lu.user_id = e.user_id)
      WHERE 1=1`;
     const params = {};
     if (scope.team_id) {
@@ -22,6 +23,10 @@ router.get('/', authenticate, requirePermission('engineers.read'), async (req, r
       sql += ' AND e.team_id = @team_id'; params.team_id = parseInt(req.query.team_id, 10);
     }
     if (scope.department_id) { sql += ' AND t.department_id = @dept_id'; params.dept_id = scope.department_id; }
+    else if (req.query.department_id) {
+      sql += ' AND COALESCE(e.department_id, t.department_id) = @dept_id';
+      params.dept_id = parseInt(req.query.department_id, 10);
+    }
     if (req.query.search && String(req.query.search).trim()) {
       sql += ' AND (e.full_name LIKE @search OR e.email LIKE @search OR e.phone LIKE @search)';
       params.search = '%' + String(req.query.search).trim() + '%';
@@ -49,9 +54,28 @@ router.post('/', authenticate, requirePermission('engineers.create'),
   auditMiddleware('CREATE', 'engineer'),
   async (req, res) => {
     try {
-      const { full_name, phone, email, employee_id, team_id, specialization, user_id } = req.body;
+      const { full_name, phone, email, employee_id, team_id, department_id, specialization, user_id } = req.body;
       if (!full_name || typeof full_name !== 'string' || !full_name.trim()) {
         return res.status(400).json({ error: 'Full name is required.' });
+      }
+      let finalDepartmentId = department_id ? parseInt(department_id, 10) : null;
+      let finalTeamId = team_id ? parseInt(team_id, 10) : null;
+
+      if (finalTeamId) {
+        const teamCheck = await query(
+          `SELECT team_id, department_id
+           FROM teams
+           WHERE team_id = @team_id AND is_active = 1`,
+          { team_id: finalTeamId }
+        );
+        if (!teamCheck.recordset.length) {
+          return res.status(400).json({ error: 'Invalid team selected.' });
+        }
+        const teamRow = teamCheck.recordset[0];
+        if (finalDepartmentId && finalDepartmentId !== teamRow.department_id) {
+          return res.status(400).json({ error: 'Selected team does not belong to selected department.' });
+        }
+        finalDepartmentId = teamRow.department_id;
       }
       if (employee_id && String(employee_id).trim()) {
         const existing = await query(
@@ -61,10 +85,10 @@ router.post('/', authenticate, requirePermission('engineers.create'),
         if (existing.recordset.length) return res.status(409).json({ error: 'An engineer with this employee ID already exists.' });
       }
       const result = await query(
-        `INSERT INTO engineers (full_name, phone, email, employee_id, team_id, specialization, user_id)
+        `INSERT INTO engineers (full_name, phone, email, employee_id, department_id, team_id, specialization, user_id)
          OUTPUT INSERTED.engineer_id
-         VALUES (@full_name, @phone, @email, @employee_id, @team_id, @specialization, @user_id)`,
-        { full_name, phone, email, employee_id, team_id, specialization, user_id }
+         VALUES (@full_name, @phone, @email, @employee_id, @department_id, @team_id, @specialization, @user_id)`,
+        { full_name, phone, email, employee_id, department_id: finalDepartmentId, team_id: finalTeamId, specialization, user_id }
       );
       res.status(201).json({ id: result.recordset[0].engineer_id, message: 'Engineer created.' });
     } catch (err) {
@@ -78,11 +102,28 @@ router.put('/:id', authenticate, requirePermission('engineers.update'),
   async (req, res) => {
     try {
       const fields = req.body;
-      const allowed = ['full_name', 'phone', 'email', 'employee_id', 'team_id', 'specialization', 'is_active', 'user_id'];
+      const allowed = ['full_name', 'phone', 'email', 'employee_id', 'department_id', 'team_id', 'specialization', 'is_active', 'user_id'];
       const updateFields = [];
       const params = { id: parseInt(req.params.id) };
       for (const f of allowed) {
         if (fields[f] !== undefined) { updateFields.push(`${f} = @${f}`); params[f] = fields[f]; }
+      }
+      if (fields.team_id !== undefined) {
+        const nextTeamId = fields.team_id ? parseInt(fields.team_id, 10) : null;
+        params.team_id = nextTeamId;
+        if (nextTeamId) {
+          const teamCheck = await query(
+            `SELECT team_id, department_id FROM teams WHERE team_id = @team_id AND is_active = 1`,
+            { team_id: nextTeamId }
+          );
+          if (!teamCheck.recordset.length) return res.status(400).json({ error: 'Invalid team selected.' });
+          const teamRow = teamCheck.recordset[0];
+          if (fields.department_id && parseInt(fields.department_id, 10) !== teamRow.department_id) {
+            return res.status(400).json({ error: 'Selected team does not belong to selected department.' });
+          }
+          params.department_id = teamRow.department_id;
+          if (!updateFields.includes('department_id = @department_id')) updateFields.push('department_id = @department_id');
+        }
       }
       if (!updateFields.length) return res.status(400).json({ error: 'No fields to update.' });
       if (fields.employee_id !== undefined && fields.employee_id && String(fields.employee_id).trim()) {

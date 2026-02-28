@@ -14,16 +14,30 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function checkAuth() {
+    const cachedUser = localStorage.getItem('user');
     try {
       const token = localStorage.getItem('token');
       if (!token) { setLoading(false); return; }
 
+      if (cachedUser && !user) {
+        try {
+          setUser(JSON.parse(cachedUser));
+        } catch {
+          localStorage.removeItem('user');
+        }
+      }
+
       const res = await api.get('/auth/me');
       setUser(res.data.user);
       setPermissions(res.data.permissions);
-    } catch {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+        setPermissions([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -31,11 +45,24 @@ export function AuthProvider({ children }) {
 
   async function login(username, password) {
     const res = await api.post('/auth/login', { username, password });
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    setUser(res.data.user);
-    await checkAuth();
+    if (res.data?.token && res.data?.user) {
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      setUser(res.data.user);
+      await checkAuth();
+    }
     return res.data;
+  }
+
+  async function completeLogin(authData) {
+    if (!authData?.token || !authData?.user) {
+      throw new Error('Invalid auth data.');
+    }
+    localStorage.setItem('token', authData.token);
+    localStorage.setItem('user', JSON.stringify(authData.user));
+    setUser(authData.user);
+    // fetch permissions in background — does NOT block redirect
+    checkAuth().catch(() => {});
   }
 
   function logout() {
@@ -58,7 +85,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, permissions, loading, login, logout, hasPermission, hasRole }}>
+    <AuthContext.Provider value={{ user, permissions, loading, login, completeLogin, logout, hasPermission, hasRole }}>
       {children}
     </AuthContext.Provider>
   );

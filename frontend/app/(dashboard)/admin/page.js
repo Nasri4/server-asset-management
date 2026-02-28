@@ -11,17 +11,18 @@ import Modal from '../../../components/ui/Modal';
 const TABS = ['Users', 'Roles', 'Settings'];
 
 export default function AdminPage() {
-  const { hasRole } = useAuth();
+  const { hasRole, hasPermission, user } = useAuth();
   const [tab, setTab] = useState('Users');
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [settings, setSettings] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [teams, setTeams] = useState([]);
+  const [engineers, setEngineers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [showPass, setShowPass] = useState(false);
-  const [form, setForm] = useState({ username: '', password: '', full_name: '', email: '', phone: '', role_id: '', department_id: '', team_id: '' });
+  const [form, setForm] = useState({ username: '', password: '', full_name: '', email: '', phone: '', role_id: '', department_id: '', team_id: '', engineer_id: '' });
   const [permissions, setPermissions] = useState([]);
   const [editingRole, setEditingRole] = useState(null);
   const [rolePermissionIds, setRolePermissionIds] = useState([]);
@@ -31,13 +32,15 @@ export default function AdminPage() {
 
   async function loadData() {
     try {
-      const [u, r, s, d, t, p] = await Promise.all([
+      const [u, r, s, d, t, p, e] = await Promise.all([
         api.get('/admin/users'), api.get('/admin/roles'), api.get('/admin/settings'),
         api.get('/departments'), api.get('/teams'),
         api.get('/admin/permissions').catch(() => ({ data: [] })),
+        api.get('/engineers').catch(() => ({ data: [] })),
       ]);
       setUsers(u.data ?? []); setRoles(r.data ?? []); setSettings(s.data ?? []); setDepartments(d.data ?? []); setTeams(t.data ?? []);
       setPermissions(p?.data ?? []);
+      setEngineers(e?.data ?? []);
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to load admin data');
     } finally {
@@ -85,10 +88,11 @@ export default function AdminPage() {
     try {
       await api.post('/admin/users', { ...form, role_id: parseInt(form.role_id),
         department_id: form.department_id ? parseInt(form.department_id) : null,
-        team_id: form.team_id ? parseInt(form.team_id) : null });
+        team_id: form.team_id ? parseInt(form.team_id) : null,
+        engineer_id: form.engineer_id ? parseInt(form.engineer_id) : null });
       toast.success('User created');
       setShowForm(false);
-      setForm({ username: '', password: '', full_name: '', email: '', phone: '', role_id: '', department_id: '', team_id: '' });
+      setForm({ username: '', password: '', full_name: '', email: '', phone: '', role_id: '', department_id: '', team_id: '', engineer_id: '' });
       const res = await api.get('/admin/users');
       setUsers(res.data);
     } catch (err) {
@@ -116,7 +120,75 @@ export default function AdminPage() {
     }
   }
 
-  if (!hasRole('Admin')) return <div className="text-center py-20 text-[var(--text-secondary)]">Admin access required.</div>;
+  const canManageUsers = hasRole('Admin') || hasPermission('admin.users');
+  const selectedRole = roles.find(r => String(r.role_id) === String(form.role_id));
+  const selectedRoleName = (selectedRole?.role_name || '').toLowerCase();
+  const isDepartmentRole = selectedRoleName.includes('department');
+  const isTeamRole = selectedRoleName.includes('team') || selectedRoleName.includes('section');
+  const isEngineerRole = selectedRoleName.includes('engineer');
+
+  const actorRole = (user?.role_name || user?.role || '').toLowerCase();
+  const actorIsAdmin = actorRole.includes('admin');
+  const actorDepartmentId = user?.department_id || null;
+  const actorTeamId = user?.team_id || null;
+
+  const visibleDepartments = departments.filter((d) => {
+    if (actorIsAdmin) return true;
+    if (!actorDepartmentId) return false;
+    return d.department_id === actorDepartmentId;
+  });
+
+  const visibleTeams = teams.filter((team) => {
+    if (!form.department_id) return false;
+    if (team.department_id !== parseInt(form.department_id, 10)) return false;
+    if (actorIsAdmin) return true;
+    if (actorTeamId) return team.team_id === actorTeamId;
+    return true;
+  });
+
+  const visibleEngineers = engineers.filter((eng) => {
+    if (eng.linked_user_id || eng.linked_username) return false;
+    if (form.department_id && eng.department_id && eng.department_id !== parseInt(form.department_id, 10)) return false;
+    if (form.team_id && eng.team_id && eng.team_id !== parseInt(form.team_id, 10)) return false;
+    if (actorIsAdmin) return true;
+    if (actorTeamId) return eng.team_id === actorTeamId;
+    if (actorDepartmentId) return eng.department_id === actorDepartmentId;
+    return false;
+  });
+
+  function onRoleChange(nextRoleId) {
+    setForm((prev) => ({
+      ...prev,
+      role_id: nextRoleId,
+      department_id: '',
+      team_id: '',
+      engineer_id: '',
+    }));
+  }
+
+  function onDepartmentChange(nextDepartmentId) {
+    setForm((prev) => ({ ...prev, department_id: nextDepartmentId, team_id: '', engineer_id: '' }));
+  }
+
+  function onTeamChange(nextTeamId) {
+    setForm((prev) => ({ ...prev, team_id: nextTeamId, engineer_id: '' }));
+  }
+
+  function onEngineerChange(nextEngineerId) {
+    const selectedEngineer = engineers.find((eng) => String(eng.engineer_id) === String(nextEngineerId));
+    if (!selectedEngineer) {
+      setForm((prev) => ({ ...prev, engineer_id: '', department_id: '', team_id: '' }));
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      engineer_id: String(selectedEngineer.engineer_id),
+      department_id: selectedEngineer.department_id ? String(selectedEngineer.department_id) : prev.department_id,
+      team_id: selectedEngineer.team_id ? String(selectedEngineer.team_id) : prev.team_id,
+    }));
+  }
+
+  if (!canManageUsers) return <div className="text-center py-20 text-[var(--text-secondary)]">Admin access required.</div>;
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 text-[var(--primary)] animate-spin" /></div>;
 
   return (
@@ -167,9 +239,64 @@ export default function AdminPage() {
                 <div className="dialog-section">
                   <span className="dialog-section-title">Role & organization</span>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div><label className="label">Role *</label><select required className="select-field" value={form.role_id} onChange={e => setForm(f => ({...f, role_id: e.target.value}))}><option value="">Select role</option>{roles.map(r => <option key={r.role_id} value={r.role_id}>{r.role_name}</option>)}</select></div>
-                    <div><label className="label">Department</label><select className="select-field" value={form.department_id} onChange={e => setForm(f => ({...f, department_id: e.target.value}))}><option value="">Select department</option>{departments.map(d => <option key={d.department_id} value={d.department_id}>{d.department_name}</option>)}</select></div>
-                    <div><label className="label">Team</label><select className="select-field" value={form.team_id} onChange={e => setForm(f => ({...f, team_id: e.target.value}))}><option value="">Select team</option>{teams.map(t => <option key={t.team_id} value={t.team_id}>{t.team_name}</option>)}</select></div>
+                    <div>
+                      <label className="label">Role *</label>
+                      <select required className="select-field" value={form.role_id} onChange={e => onRoleChange(e.target.value)}>
+                        <option value="">Select role</option>
+                        {roles.map(r => <option key={r.role_id} value={r.role_id}>{r.role_name}</option>)}
+                      </select>
+                    </div>
+
+                    {(isDepartmentRole || isTeamRole || isEngineerRole) && (
+                      <div>
+                        <label className="label">Department {isDepartmentRole || isTeamRole ? '*' : ''}</label>
+                        <select
+                          required={isDepartmentRole || isTeamRole}
+                          className="select-field"
+                          value={form.department_id}
+                          onChange={e => onDepartmentChange(e.target.value)}
+                          disabled={isEngineerRole && !!form.engineer_id}
+                        >
+                          <option value="">Select department</option>
+                          {visibleDepartments.map(d => <option key={d.department_id} value={d.department_id}>{d.department_name}</option>)}
+                        </select>
+                      </div>
+                    )}
+
+                    {(isTeamRole || isEngineerRole) && (
+                      <div>
+                        <label className="label">Team {isTeamRole ? '*' : ''}</label>
+                        <select
+                          required={isTeamRole}
+                          className="select-field"
+                          value={form.team_id}
+                          onChange={e => onTeamChange(e.target.value)}
+                          disabled={isEngineerRole && !!form.engineer_id}
+                        >
+                          <option value="">Select team</option>
+                          {visibleTeams.map(t => <option key={t.team_id} value={t.team_id}>{t.team_name}</option>)}
+                        </select>
+                      </div>
+                    )}
+
+                    {isEngineerRole && (
+                      <div className="md:col-span-3">
+                        <label className="label">Engineer *</label>
+                        <select
+                          required
+                          className="select-field"
+                          value={form.engineer_id}
+                          onChange={e => onEngineerChange(e.target.value)}
+                        >
+                          <option value="">Select engineer</option>
+                          {visibleEngineers.map(eng => (
+                            <option key={eng.engineer_id} value={eng.engineer_id}>
+                              {eng.full_name} {eng.team_name ? `(${eng.team_name})` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

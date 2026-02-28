@@ -4,20 +4,22 @@ const { query } = require('../config/db');
 const { authenticate } = require('../middleware/auth');
 const { requirePermission, scopeFilter } = require('../middleware/rbac');
 const { auditMiddleware, logAudit } = require('../middleware/audit');
+const { buildScope } = require('../middleware/scope.middleware');
 const { verifyOTP } = require('../utils/otp');
 
 // GET /api/servers - List with search and pagination
-router.get('/', authenticate, requirePermission('servers.read'), async (req, res) => {
+router.get('/', authenticate, requirePermission('servers.read'), buildScope('servers'), async (req, res) => {
   try {
-    const scope = scopeFilter(req);
+    const scope = req.scope || { conditions: [], params: {} };
     const { search, page = 1, page_size = 25 } = req.query;
     const p = Math.max(1, parseInt(page, 10) || 1);
     const ps = Math.min(100, Math.max(1, parseInt(page_size, 10) || 25));
     const offset = (p - 1) * ps;
     let where = ' WHERE 1=1';
-    const params = {};
-    if (scope.department_id) { where += ' AND s.department_id = @dept_id'; params.dept_id = scope.department_id; }
-    if (scope.team_id) { where += ' AND s.team_id = @team_id'; params.team_id = scope.team_id; }
+    const params = { ...(scope.params || {}) };
+    if (Array.isArray(scope.conditions) && scope.conditions.length) {
+      where += ' AND ' + scope.conditions.join(' AND ');
+    }
     if (search && String(search).trim()) { where += ' AND (s.server_code LIKE @search OR s.hostname LIKE @search)'; params.search = '%' + String(search).trim() + '%'; }
 
     const countResult = await query('SELECT COUNT(*) AS total FROM servers s LEFT JOIN departments d ON s.department_id = d.department_id' + where, params);

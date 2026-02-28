@@ -218,9 +218,19 @@ All pages, lists, and reports are automatically filtered by the user's role scop
 ## API Endpoints Summary
 
 ### Auth
-- `POST /api/auth/login` — Login
+- `POST /api/auth/login` — Step 1 password check, sends OTP, returns `requiresOtp`
+- `POST /api/auth/verify-otp` — Step 2 OTP verification, returns `token` + `user`
+- `POST /api/auth/resend-otp` — Resend OTP (cooldown + rate limits enforced)
 - `GET /api/auth/me` — Current user + permissions
 - `POST /api/auth/change-password` — Change password
+
+### Login 2FA Test (Postman)
+1. `POST /api/auth/login` with `username` and `password`.
+2. Expect response: `{ "requiresOtp": true, "tempAuthId": "...", "message": "OTP sent" }`.
+3. Receive OTP on the user phone via Hormuud SMS.
+4. `POST /api/auth/verify-otp` with `{ "otp": "123456", "tempAuthId": "..." }`.
+5. Expect response: `{ "success": true, "token": "...", "user": { ... } }`.
+6. Use `Authorization: Bearer <token>` for protected endpoints.
 
 ### Servers
 - `GET /api/servers` — List (filtered, paginated)
