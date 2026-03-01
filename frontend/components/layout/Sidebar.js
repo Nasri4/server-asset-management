@@ -7,20 +7,20 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '../../lib/auth';
 import { cn } from '../../lib/utils';
 import {
-  LayoutDashboard, Server, MapPin, Activity, Shield,
+  LayoutDashboard, Server, MapPin, Shield,
   AppWindow, Wrench, AlertTriangle, Building2, BarChart3,
   FileText, Settings, ChevronDown, Menu, X, LogOut,
-  UserCircle, PanelLeftClose, PanelLeft, Eye, Gauge, Layers,
-  Cpu, Globe, CalendarCheck,
+  UserCircle, PanelLeftClose, PanelLeft, Eye, Layers,
+  Cpu, Globe, CalendarCheck, Monitor, Router, PackageCheck,
+  Network, Users,
 } from 'lucide-react';
 
 import Hlogo from '../../app/Hlogo.png';
 
-// Navigation items remain unchanged
 const navItems = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Dashboard', href: '/', icon: LayoutDashboard },
   {
-    label: 'Servers', icon: Server, children: [
+    label: 'Servers & VMs', icon: Server, children: [
       { label: 'Overview', href: '/servers', icon: Eye },
       { label: 'Hardware', href: '/hardware', icon: Cpu },
       { label: 'Network', href: '/network', icon: Globe },
@@ -28,33 +28,34 @@ const navItems = [
       { label: 'Applications', href: '/applications', icon: AppWindow },
     ],
   },
+  { label: 'Workstations / PCs', href: '/workstations', icon: Monitor },
+  { label: 'Network Devices', href: '/network-devices', icon: Router },
+  { label: 'Software & Licenses', href: '/software', icon: PackageCheck },
   {
-    label: 'Locations & Racks', icon: MapPin, children: [
+    label: 'Locations & Sites', icon: MapPin, children: [
       { label: 'Locations', href: '/locations', icon: MapPin },
-      { label: 'Racks', href: '/racks', icon: Layers },
+      { label: 'Racks & Cabinets', href: '/racks', icon: Layers },
     ],
   },
-  {
-    label: 'Operations', icon: Activity, children: [
-      { label: 'Monitoring', href: '/monitoring', icon: Gauge },
-      { label: 'Maintenance', href: '/maintenance', icon: Wrench },
-      { label: 'Incidents', href: '/incidents', icon: AlertTriangle },
-      { label: 'Visits', href: '/visits', icon: CalendarCheck },
-    ],
-  },
+  { label: 'IPAM', href: '/ipam', icon: Network },
+  { label: 'Maintenance', href: '/maintenance', icon: Wrench },
+  { label: 'Incidents / Tickets', href: '/incidents', icon: AlertTriangle },
+  { label: 'Visits & Access', href: '/visits', icon: CalendarCheck },
+  { label: 'Employees / Users', href: '/employees', icon: Users },
   { label: 'Engineers', href: '/engineers', icon: UserCircle },
-  { label: 'Teams / Departments', href: '/teams', icon: Building2 },
-  { label: 'Reports', href: '/reports', icon: BarChart3 },
-  { label: 'Audit Logs', href: '/audit-log', icon: FileText, permission: 'audit.read' },
+  { label: 'Departments / Teams', href: '/departments', icon: Building2 },
+  { label: 'Reports & Analytics', href: '/reports', icon: BarChart3 },
+  { label: 'Audit Logs', href: '/audit-logs', icon: FileText, permission: 'audit.read' },
   { label: 'Administration', href: '/admin', icon: Settings, roles: ['Admin'] },
 ];
 
 const navSections = [
   { title: 'Overview', items: ['Dashboard'] },
-  { title: 'Infrastructure', items: ['Servers', 'Locations & Racks'] },
-  { title: 'Operations', items: ['Operations'] },
-  { title: 'Organization', items: ['Engineers', 'Teams / Departments'] },
-  { title: 'System', items: ['Reports', 'Audit Logs', 'Administration'] },
+  { title: 'Asset Inventory', items: ['Servers & VMs', 'Workstations / PCs', 'Network Devices', 'Software & Licenses'] },
+  { title: 'Datacenter & Infra', items: ['Locations & Sites', 'IPAM'] },
+  { title: 'Operations & Service', items: ['Maintenance', 'Incidents / Tickets', 'Visits & Access'] },
+  { title: 'Organization', items: ['Employees / Users', 'Engineers', 'Departments / Teams'] },
+  { title: 'System & Security', items: ['Reports & Analytics', 'Audit Logs', 'Administration'] },
 ];
 
 export default function Sidebar() {
@@ -65,33 +66,21 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout, hasPermission, hasRole } = useAuth();
 
-  // Auto-expand/collapse based on active page
   useEffect(() => {
     const next = {};
-    
-    // Close all sections first
+    navItems.forEach(item => { if (item.children) next[item.label] = false; });
     navItems.forEach(item => {
-      if (item.children) {
-        next[item.label] = false;
-      }
+      if (item.children?.some(c => pathname.startsWith(c.href))) next[item.label] = true;
     });
-    
-    // Then open only the section that contains the current page
-    navItems.forEach(item => {
-      if (item.children?.some(c => pathname.startsWith(c.href))) {
-        next[item.label] = true;
-      }
-    });
-    
     setExpanded(next);
-  }, [pathname]); // Run whenever pathname changes
+  }, [pathname]);
 
   function toggleExpand(label) {
     setExpanded(prev => ({ ...prev, [label]: !prev[label] }));
   }
 
   function isActive(href) {
-    if (href === '/dashboard') return pathname === '/dashboard';
+    if (href === '/') return pathname === '/' || pathname === '/dashboard';
     return pathname.startsWith(href);
   }
 
@@ -101,7 +90,7 @@ export default function Sidebar() {
     return true;
   }
 
-  function ChildItem({ child, isLast }) {
+  function ChildItem({ child }) {
     const active = isActive(child.href);
     const Icon = child.icon;
     return (
@@ -109,13 +98,16 @@ export default function Sidebar() {
         href={child.href}
         onClick={() => setMobileOpen(false)}
         className={cn(
-          'flex items-center gap-2.5 ml-8 mr-2 py-2 pl-3 pr-2 rounded-lg text-[13px] transition-all duration-150',
+          'flex items-center gap-2.5 ml-9 mr-1.5 py-1.5 pl-3 pr-2 rounded-lg text-[12.5px] transition-all duration-200',
           active
-            ? 'bg-[var(--sidebar-active)] text-white font-medium'
-            : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-white'
+            ? 'text-white font-semibold'
+            : 'text-[var(--sidebar-text)] hover:bg-white/5 hover:text-white'
         )}
+        style={active ? { background: 'rgba(23,164,247,0.15)' } : {}}
       >
-        {Icon && <Icon className={cn('w-3.5 h-3.5 flex-shrink-0', active ? 'text-[var(--sidebar-active-border)]' : 'opacity-50')} />}
+        {Icon && (
+          <Icon className={cn('w-3.5 h-3.5 flex-shrink-0', active ? 'text-[var(--sidebar-active-border)]' : 'opacity-40')} />
+        )}
         <span className="truncate">{child.label}</span>
       </Link>
     );
@@ -136,32 +128,36 @@ export default function Sidebar() {
             type="button"
             onClick={() => toggleExpand(item.label)}
             className={cn(
-              'group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-150',
+              'group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all duration-200',
               childActive
-                ? 'bg-[var(--sidebar-active)] text-white font-medium'
-                : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-white'
+                ? 'text-white font-semibold'
+                : 'text-[var(--sidebar-text)] hover:bg-white/5 hover:text-white'
             )}
+            style={childActive ? { background: 'rgba(23,164,247,0.15)' } : {}}
           >
-            {childActive && (
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[var(--sidebar-active-border)]" />
-            )}
-            <Icon className={cn('w-[18px] h-[18px] flex-shrink-0', childActive ? 'text-[var(--sidebar-active-border)]' : 'opacity-50 group-hover:opacity-80')} />
+            <Icon className={cn('w-[18px] h-[18px] flex-shrink-0 transition-colors duration-200', childActive ? 'text-[var(--sidebar-active-border)]' : 'opacity-40 group-hover:opacity-70')} />
             {!collapsed && (
               <>
                 <span className="flex-1 text-left truncate">{item.label}</span>
-                <ChevronDown className={cn('w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 opacity-40', isExp ? 'rotate-0' : '-rotate-90')} />
+                <ChevronDown className={cn('w-3.5 h-3.5 flex-shrink-0 transition-transform duration-200 opacity-30', isExp ? 'rotate-0' : '-rotate-90')} />
               </>
             )}
             {collapsed && <span className="sidebar-tooltip group-hover:opacity-100">{item.label}</span>}
           </button>
+
           {!collapsed && (
             <div
-              className="overflow-hidden transition-[max-height] duration-200 ease-out"
-              style={{ maxHeight: isExp ? 48 * item.children.length : 0 }}
+              className="overflow-hidden transition-[max-height] duration-250 ease-out"
+              style={{ maxHeight: isExp ? 44 * item.children.length : 0 }}
             >
-              <div className="mt-0.5 space-y-0.5 pb-1">
-                {item.children.map((child, idx) => (
-                  <ChildItem key={child.href} child={child} isLast={idx === item.children.length - 1} />
+              <div className="mt-0.5 pb-1 space-y-0.5 relative">
+                {/* Connector line */}
+                <div
+                  className="absolute left-[22px] top-0 bottom-2 w-px"
+                  style={{ background: 'linear-gradient(to bottom, var(--sidebar-divider), transparent)' }}
+                />
+                {item.children.map((child) => (
+                  <ChildItem key={child.href} child={child} />
                 ))}
               </div>
             </div>
@@ -175,16 +171,14 @@ export default function Sidebar() {
         href={item.href}
         onClick={() => setMobileOpen(false)}
         className={cn(
-          'group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-150',
+          'group relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] transition-all duration-200',
           active
-            ? 'bg-[var(--sidebar-active)] text-white font-medium'
-            : 'text-[var(--sidebar-text)] hover:bg-[var(--sidebar-hover)] hover:text-white'
+            ? 'text-white font-semibold'
+            : 'text-[var(--sidebar-text)] hover:bg-white/5 hover:text-white'
         )}
+        style={active ? { background: 'rgba(23,164,247,0.15)' } : {}}
       >
-        {active && (
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-[var(--sidebar-active-border)]" />
-        )}
-        <Icon className={cn('w-[18px] h-[18px] flex-shrink-0', active ? 'text-[var(--sidebar-active-border)]' : 'opacity-50 group-hover:opacity-80')} />
+        <Icon className={cn('w-[18px] h-[18px] flex-shrink-0 transition-colors duration-200', active ? 'text-[var(--sidebar-active-border)]' : 'opacity-40 group-hover:opacity-70')} />
         {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
         {collapsed && <span className="sidebar-tooltip group-hover:opacity-100">{item.label}</span>}
       </Link>
@@ -193,42 +187,47 @@ export default function Sidebar() {
 
   const sidebarContent = (
     <div className="flex flex-col h-full" style={{ backgroundColor: 'var(--sidebar-bg)' }}>
+
       {/* Logo */}
       <div className="flex-shrink-0">
-        <Link href="/dashboard" className={cn(
-          'flex items-center h-16 px-4 transition-all duration-200 hover:opacity-90',
-          collapsed ? 'justify-center' : 'justify-start gap-3'
-        )}>
-          <Image 
-            src={Hlogo} 
-            alt="TELCO" 
-            className={cn(
-              'w-auto object-contain transition-all duration-200',
-              collapsed ? 'h-10' : 'h-11'
-            )} 
-            priority 
+        <Link
+          href="/"
+          className={cn(
+            'flex items-center h-[70px] px-4 transition-all duration-200 hover:opacity-90',
+            collapsed ? 'justify-center' : 'justify-start'
+          )}
+        >
+          <Image
+            src={Hlogo}
+            alt="TELCO"
+            className={cn('w-auto object-contain transition-all duration-200', collapsed ? 'h-12' : 'h-14')}
+            priority
           />
         </Link>
-        <div className="mx-3 h-px" style={{ background: 'var(--sidebar-divider)' }} />
+        {/* Gradient divider */}
+        <div className="mx-4 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--sidebar-divider), transparent)' }} />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto scrollbar-dark py-3 px-2.5 min-h-0">
+      <nav className="flex-1 overflow-y-auto scrollbar-dark py-3 px-2 min-h-0">
         {navSections.map((section) => {
           const sectionItems = navItems.filter(i => section.items.includes(i.label) && canView(i));
           if (sectionItems.length === 0) return null;
           return (
-            <div key={section.title} className="mb-4">
+            <div key={section.title} className="mb-5">
               {!collapsed && (
-                <div className="px-3 mb-2 pt-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.1em]" style={{ color: 'var(--sidebar-section-text)' }}>
+                <div className="px-3 mb-1.5">
+                  <span
+                    className="text-[10px] font-bold uppercase tracking-[0.18em]"
+                    style={{ color: 'var(--sidebar-section-text)', opacity: 0.5 }}
+                  >
                     {section.title}
                   </span>
                 </div>
               )}
               {collapsed && (
                 <div className="flex justify-center mb-2">
-                  <div className="w-5 h-px" style={{ background: 'var(--sidebar-divider)' }} />
+                  <div className="w-4 h-px" style={{ background: 'var(--sidebar-divider)' }} />
                 </div>
               )}
               <div className="space-y-0.5">
@@ -242,28 +241,37 @@ export default function Sidebar() {
       </nav>
 
       {/* User panel */}
-      <div className="mt-auto flex-shrink-0">
-        <div className="mx-3 h-px" style={{ background: 'var(--sidebar-divider)' }} />
-        <div className="p-2.5">
-          <div className="rounded-xl p-2.5" style={{ background: 'var(--sidebar-surface)', border: '1px solid var(--sidebar-divider)' }}>
+      <div className="flex-shrink-0">
+        <div className="mx-4 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--sidebar-divider), transparent)' }} />
+        <div className="p-3">
+          <div
+            className="rounded-2xl p-3"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}
+          >
             {!collapsed ? (
               <div className="space-y-2.5">
-                <div className="flex items-center gap-2.5 px-1.5 py-1">
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center text-sm font-semibold flex-shrink-0" style={{ background: 'var(--primary)', color: 'white' }}>
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg, var(--primary) 0%, #0B8FDE 100%)', color: 'white' }}
+                  >
                     {user?.full_name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-white truncate">{user?.full_name}</div>
-                    <div className="text-xs truncate" style={{ color: 'var(--sidebar-text-muted)' }}>{user?.role_name || user?.role}</div>
+                    <div className="text-[13px] font-semibold text-white truncate leading-tight">{user?.full_name}</div>
+                    <div className="text-[11px] truncate mt-0.5" style={{ color: 'var(--sidebar-text-muted)' }}>{user?.role_name || user?.role}</div>
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={logout}
-                  className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-all duration-150 hover:bg-[var(--sidebar-hover)] hover:text-white"
-                  style={{ color: 'var(--sidebar-text)', border: '1px solid var(--sidebar-divider)' }}
+                  className="w-full flex items-center justify-center gap-2 py-1.5 rounded-xl text-xs font-medium transition-all duration-200 hover:bg-white/10 hover:text-white"
+                  style={{ color: 'var(--sidebar-text)', border: '1px solid rgba(255,255,255,0.08)' }}
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                   Sign out
                 </button>
               </div>
@@ -271,17 +279,17 @@ export default function Sidebar() {
               <button
                 type="button"
                 onClick={logout}
-                className="w-full flex items-center justify-center p-2.5 rounded-lg transition-all hover:bg-[var(--sidebar-hover)] hover:text-white"
+                className="w-full flex items-center justify-center p-2 rounded-xl transition-all duration-200 hover:bg-white/10 hover:text-white"
                 style={{ color: 'var(--sidebar-text-muted)' }}
                 title="Sign out"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-4 h-4" />
               </button>
             )}
           </div>
           {!collapsed && (
-            <div className="text-center pt-2 pb-1">
-              <span className="text-[10px]" style={{ color: 'var(--sidebar-text-muted)' }}>v3.0 · Enterprise</span>
+            <div className="text-center pt-2 pb-0.5">
+              <span className="text-[10px]" style={{ color: 'var(--sidebar-text-muted)', opacity: 0.5 }}>v3.0 · Enterprise</span>
             </div>
           )}
         </div>
@@ -295,15 +303,19 @@ export default function Sidebar() {
       <button
         type="button"
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 rounded-lg border shadow-lg text-white"
-        style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--sidebar-divider)' }}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 rounded-xl border shadow-lg text-white transition-colors"
+        style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'rgba(255,255,255,0.08)' }}
       >
         {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </button>
 
       {/* Mobile overlay */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 bg-[#272F3B]/60 backdrop-blur-sm transition-opacity" onClick={() => setMobileOpen(false)} aria-hidden />
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden
+        />
       )}
 
       {/* Mobile sidebar */}
@@ -324,15 +336,16 @@ export default function Sidebar() {
         )}
       >
         {sidebarContent}
-        {/* Collapse button */}
+
+        {/* Collapse toggle */}
         <button
           type="button"
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-28 w-6 h-6 flex items-center justify-center rounded-full border bg-white hover:text-[var(--primary)] hover:border-[var(--primary)] transition-colors z-10"
-          style={{ borderColor: 'var(--border)', color: 'var(--text-muted)', boxShadow: 'var(--shadow-sm)' }}
+          className="absolute -right-3 top-[88px] w-6 h-6 flex items-center justify-center rounded-full bg-white transition-all duration-200 hover:scale-110 hover:text-[var(--primary)] z-10"
+          style={{ border: '1.5px solid var(--border)', color: 'var(--text-muted)', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}
           title={collapsed ? 'Expand' : 'Collapse'}
         >
-          {collapsed ? <PanelLeft className="w-3.5 h-3.5" /> : <PanelLeftClose className="w-3.5 h-3.5" />}
+          {collapsed ? <PanelLeft className="w-3 h-3" /> : <PanelLeftClose className="w-3 h-3" />}
         </button>
       </aside>
     </>

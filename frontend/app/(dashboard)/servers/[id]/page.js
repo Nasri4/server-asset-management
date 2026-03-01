@@ -160,15 +160,23 @@ export default function ServerDetailPage() {
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3 min-w-0">
-              <Link href="/servers" className="p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--section-bg)] hover:text-[var(--text-primary)] transition-colors" aria-label="Back to servers">
+              <Link href="/servers" className="p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--section-bg)] hover:text-[var(--text-primary)] transition-colors flex-shrink-0" aria-label="Back to servers">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'var(--primary-soft)' }}>
+                <Server className="w-5 h-5 text-[var(--primary)]" />
+              </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-semibold font-mono truncate text-[var(--text-primary)]">{s.server_code}</h1>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-xl font-bold font-mono truncate text-[var(--text-primary)]">{s.server_code}</h1>
                   <span className={getStatusColor(s.status)}>{s.status}</span>
                 </div>
-                <p className="text-sm text-[var(--text-secondary)] truncate">{s.hostname || 'Server details'}</p>
+                <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                  {s.hostname && <span className="text-xs text-[var(--text-secondary)]">{s.hostname}</span>}
+                  {net?.ip_address && <><span className="text-[var(--border)]">·</span><span className="text-xs font-mono text-[var(--text-muted)]">{net.ip_address}</span></>}
+                  {s.environment && <><span className="text-[var(--border)]">·</span><span className="text-xs text-[var(--text-muted)]">{s.environment}</span></>}
+                  {s.server_type && <><span className="text-[var(--border)]">·</span><span className="text-xs text-[var(--text-muted)]">{s.server_type}</span></>}
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -208,16 +216,24 @@ export default function ServerDetailPage() {
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
           <aside className="w-52 flex-shrink-0 hidden lg:block">
-            <nav className="sticky top-24 card p-2 space-y-0.5">
+            <nav className="sticky top-24 card p-1.5 space-y-0.5">
               {TABS.map((t) => {
                 const Icon = t.icon;
+                const isActive = tab === t.id;
                 return (
                   <button
                     key={t.id}
                     type="button"
                     onClick={() => setTab(t.id)}
-                    className={`side-nav-item ${tab === t.id ? 'side-nav-item-active' : 'side-nav-item-inactive'}`}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-all duration-150 text-left relative"
+                    style={isActive
+                      ? { background: 'var(--primary-soft)', color: 'var(--primary)', fontWeight: 600 }
+                      : { color: 'var(--text-secondary)' }
+                    }
+                    onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--section-bg)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
+                    onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = ''; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
                   >
+                    {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full" style={{ background: 'var(--primary)' }} />}
                     <Icon className="w-4 h-4 flex-shrink-0" />
                     {t.label}
                   </button>
@@ -234,7 +250,7 @@ export default function ServerDetailPage() {
                 {TABS.map((t) => {
                   const Icon = t.icon;
                   return (
-                    <button key={t.id} type="button" onClick={() => setTab(t.id)} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${tab === t.id ? 'bg-[var(--primary-soft)] text-[var(--primary)] font-semibold' : 'bg-[var(--content-surface)] text-[var(--text-secondary)] border border-[var(--border)]'}`}>
+                    <button key={t.id} type="button" onClick={() => setTab(t.id)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-150 ${tab === t.id ? 'text-[var(--primary)] font-semibold' : 'bg-[var(--content-surface)] text-[var(--text-secondary)] border border-[var(--border)]'}`} style={tab === t.id ? { background: 'var(--primary-soft)' } : {}}>
                       <Icon className="w-4 h-4" /> {t.label}
                     </button>
                   );
@@ -248,6 +264,20 @@ export default function ServerDetailPage() {
               {/* ——— OVERVIEW ——— */}
               {tab === 'overview' && (
                 <div>
+                  {/* Quick stat bar */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-[var(--border)]">
+                    {[
+                      { label: 'Status', value: s.status || '—', cls: getStatusColor(s.status) },
+                      { label: 'IP Address', value: net?.ip_address || '—', mono: true },
+                      { label: 'Environment', value: s.environment || '—' },
+                      { label: 'Open Incidents', value: openIncidents.length > 0 ? `${openIncidents.length} open` : 'None', cls: openIncidents.length > 0 ? 'text-[var(--warning)] font-semibold' : 'text-[var(--success)] font-semibold' },
+                    ].map((item, i) => (
+                      <div key={i} className="px-4 py-3 border-r last:border-r-0 border-[var(--border)]" style={{ background: 'var(--section-bg)' }}>
+                        <p className="text-[10px] uppercase tracking-widest font-semibold text-[var(--text-muted)] mb-1">{item.label}</p>
+                        <span className={`text-sm font-semibold ${item.mono ? 'font-mono' : ''} ${item.cls || 'text-[var(--text-primary)]'}`}>{item.value}</span>
+                      </div>
+                    ))}
+                  </div>
                   <div className="data-section">
                     <div className="data-section-title">Server Identity</div>
                     <div className="data-grid">

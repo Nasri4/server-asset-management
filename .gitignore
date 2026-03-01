@@ -40,4 +40,7 @@ login_tmp.json
 
 # Secrets
 config/secrets/
-credentials.jsonfrontend/nul
+credentials.json
+
+# Local tooling
+.claude/
